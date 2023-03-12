@@ -1,0 +1,45 @@
+version: '3'
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: ./tests/Dockerfile
+    env_file:
+      - .env
+      - .env.docker
+    ports:
+     - 8080:8080
+    stdin_open:
+      true
+    tty:
+      true
+    depends_on:
+      fastapi:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "pytest -v"
+
+  postgres:
+    ports:
+      - "5432:5432"
+
+  elastic:
+    ports:
+      - "9200:9200"
+
+  etl:
+    restart: 'no'
+
+  fastapi:
+    ports:
+      - "8000:8000"
+    restart: 'no'
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  nginx:
+    depends_on:
+      tests:
+        condition: service_completed_successfully

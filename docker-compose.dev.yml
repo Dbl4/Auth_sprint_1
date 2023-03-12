@@ -1,0 +1,21 @@
+version: '3'
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  elastic:
+    ports:
+      - "9200:9200"
+
+  etl:
+    restart: 'no'
+
+  fastapi:
+    ports:
+      - "8000:8000"
+    restart: 'no'
+
+  redis:
+    ports:
+      - "6379:6379"
