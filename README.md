@@ -5,6 +5,8 @@
 
 [ER-диаграмма для Admin PostgreSQL](documentation/admin-er-diagram.md)
 
+[ER-диаграмма для Auth PostgreSQL](documentation/auth-er-diagram.md)
+
 # Сборка и запуск системы
 Для сборки и запуска приложения в терминале перейдите в папку проекта и используйте следующие команды.
 
