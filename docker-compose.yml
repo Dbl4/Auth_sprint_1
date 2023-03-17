@@ -102,8 +102,50 @@ services:
     ports:
       - "80:80"
 
+  auth_postgres:
+    image: postgres:14.4
+    env_file:
+      - .env
+      - .env.docker
+    expose:
+      - "54321"
+    volumes:
+      - auth_postgres_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -q --dbname=${POSTGRES_DB} --username=${POSTGRES_USER}
+      interval: 2s
+      timeout: 2s
+      retries: 5
+
+  auth:
+    build:
+      context: .
+      dockerfile: ./auth/Dockerfile
+    env_file:
+      - .env
+      - .env.docker
+    expose:
+      - "5000"
+    depends_on:
+      auth_postgres:
+        condition: service_healthy
+    restart: always
+
+  auth_redis:
+    image: redis:6
+    env_file:
+      - .env
+      - .env.docker
+    expose:
+      - "63791"
+    volumes:
+      - auth_redis_volume:/data
+    restart: always
+
 volumes:
   postgres_volume:
   elastic_volume:
   etl_volume:
   redis_volume:
+  auth_postgres_volume:
+  auth_redis_volume:
