@@ -1,9 +1,19 @@
-Ссылка на проект - https://github.com/rtmvnv/Async_API_sprint_2
+Ссылка на проект - https://github.com/Dbl4/Auth_sprint_1
+
+# Описание сервиса
+[Блок-схема сервиса](documentation/block-scheme.md)
+
+[ER-диаграмма для Admin PostgreSQL](documentation/admin-er-diagram.md)
+
+[ER-диаграмма для Auth PostgreSQL](documentation/auth-er-diagram.md)
 
 # Сборка и запуск системы
 Для сборки и запуска приложения в терминале перейдите в папку проекта и используйте следующие команды.
 
 ## Первый запуск системы
+Сформировать файл `.env`.
+(Опционально) Запустить виртуальное окружение.
+Установить зависимости `pip install -r requirements.txt`.
 Cкомпилировать контейнеры `make build`.
 Запустить приложения в режиме разработки `make dev`.
 Загрузить начальные данные в Postgres `make loaddata`.
