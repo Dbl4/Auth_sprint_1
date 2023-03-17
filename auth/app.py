@@ -1,7 +1,19 @@
-from flask import Flask, render_template
+from flask import Flask
+
+from db import init_db, db
 
 app = Flask(__name__)
 
+
+# init_db(app)
+# app.app_context().push()
+# db.create_all()
+
+def main():
+    init_db(app)
+    app.app_context().push()
+    db.create_all()
+    app.run()
 #
 # @app.route('/login')
 # def login():
@@ -9,4 +21,4 @@ app = Flask(__name__)
 
 
 if __name__ == '__main__':
-    app.run()
+    main()
