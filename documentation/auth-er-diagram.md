@@ -6,7 +6,7 @@ erDiagram
 
 USERS {
     id uuid PK
-    login string
+    email string
     password string
     role string
     created timestamp
