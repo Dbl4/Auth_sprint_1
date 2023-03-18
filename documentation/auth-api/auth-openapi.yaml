@@ -1,0 +1,470 @@
+openapi: 3.0.0
+info:
+  title: Auth API
+  version: 1.0.0
+servers :
+  - url: http://localhost/api/v1
+paths:
+  /users/:
+    get:
+      summary: Получение списка пользователей
+      responses:
+        '200':
+          description: Успешный ответ со списком пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - email
+                    - role
+                  properties:
+                    user_id:
+                      type: string
+                      format: uuid
+                    email:
+                      type: string
+                      example: bob@example.com
+                    created:
+                      type: string
+                      format: date-time
+                    modified:
+                      type: string
+                      format: date-time
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено администратору
+    post:
+      summary: Регистрация нового пользователя
+      description: |
+        В базе данных создается запись о новом пользователе.
+        Вход в систему не производится, для входа надо отдельно
+        вызвать POST /tokens/.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '201':
+          description: Успешная регистрация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  username:
+                    type: string
+                    example: username
+                  email:
+                    type: string
+                    format: email
+                    example: email@example.com
+        '409':
+          description: Пользователь с этим e-mail уже зарегистрирован
+
+  /users/{user_id}/:
+    patch:
+      summary: Изменение данных пользователя
+      parameters:
+        - in: path
+          required: true
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Успешное обновление данных
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено самому пользователю и администратору
+        '404':
+          description: Пользователь не найден
+  
+  
+  /users/{user_id}/history/:
+    get:
+      summary: Получение истории входов пользователя
+      parameters:
+        - in: path
+          required: true
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date-time
+                    action:
+                      type: string
+                      enum:
+                        - 'login'
+                        - 'logout'
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено самому пользователю и администратору
+        '404':
+          description: Пользователь не найден
+  
+  /users/{user_id}/roles/:
+    get:
+      summary: Получение списка ролей пользователя
+      parameters:
+        - in: path
+          required: true
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Вывод списка ролей пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    name:
+                      type: string
+                      enum:
+                        - regular
+                        - premium
+                        - admin
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено самому пользователю и администратору
+        '404':
+          description: Пользователь не найден
+    put:
+      summary: Добавление пользователю роли
+      parameters:
+        - in: path
+          required: true
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role_id:
+                  type: string
+                  format: uuid
+                  description: role id
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    name:
+                      type: string
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено администратору
+        '404':
+          description: Пользователь не найден
+          
+  /users/{user_id}/check/:
+    get:
+      summary: Проверка JWT-токена
+      description: При необходимости аутентификации пользователя прикладной сервис
+        делает этот запрос с указанием JWT-токена в заголовке.
+      parameters:
+        - in: path
+          required: true
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: JWT-токен валиден
+        '401':
+          description: JWT-токен просрочен
+        '403':
+          description: Подпись JWT-токена неверная
+        '404':
+          description: Пользователь не найден
+
+  /users/{user_id}/roles/{role_id}/:
+    delete:
+      summary: Отмена роли у пользователя
+      parameters:
+        - in: path
+          required: true
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          required: true
+          name: role_id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Роль успешно удалена
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено администратору
+        '404':
+          description: Пользователь или роль не найдены
+  
+  /login/:
+    post:
+      summary: Вход пользователя в систему, получение токенов
+      description: Проверка пароля и выдача access и refresh токенов.
+        Значения полей user-agent и user-ip сохраняются в auth-history,
+        а также записываются в JWT-токен, где их может использовать 
+        прикладной сервис для дополнительной проверки запроса.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                user-agent:
+                  type: string
+                user-ip:
+                  type: string
+      responses:
+        '200':
+          description: Успешный вход в систему
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access:
+                    type: string
+                  refresh:
+                    type: string
+        '403':
+          description: Неверный пароль         
+  
+  
+  /refresh/:
+    post:
+      summary: Обновление access и refresh токенов
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh
+              properties:
+                refresh:
+                  type: string
+                  description: refresh токен
+      responses:
+        '200':
+          description: Успешное обновление токенов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access:
+                    type: string
+                  refresh:
+                    type: string
+        '403':
+          description: refresh токен не найден
+  
+  /logout/:
+    post:
+      summary: Осуществление выхода пользователя
+      description: Удаляет refresh токен, ассоциированный
+        с полученным access токеном. Access токен надо передавать
+        в теле, а не в заголовке.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - access_token
+              properties:
+                access_token:
+                  type: string
+                  format: jwt
+                  description: JWT токен
+                everywhere:
+                  description: Выйти на всех устройствах
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Успешный выход
+        '403':
+          description: Действие разрешено самому пользователю и администратору
+        '404':
+          description: Пользователь не найден
+  
+  /roles/:
+    get:
+      description: Получить полный список ролей
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    name:
+                      type: string
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено администратору
+    post:
+      description: Создание роли
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено администратору
+
+  /roles/{role_id}/:
+    put:
+      description: Переименовать роль
+      parameters:
+        - in: path
+          required: true
+          name: role_id
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '204':
+          description: Роль переименована
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено администратору
+        '404':
+          description: Роль не найдена
+    delete:
+      parameters:
+        - in: path
+          required: true
+          name: role_id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Роль удалена
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено администратору
+        '404':
+          description: Роль не найдена
