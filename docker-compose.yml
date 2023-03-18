@@ -112,10 +112,11 @@ services:
     volumes:
       - auth_postgres_volume:/var/lib/postgresql/data
     healthcheck:
-      test: pg_isready -q --dbname=${POSTGRES_DB_AUTH} --username=${POSTGRES_USER}
+      test: pg_isready -q --port=54321 --dbname=${POSTGRES_DB_AUTH} --username=${POSTGRES_USER}
       interval: 2s
       timeout: 2s
       retries: 5
+    command: -p 54321
 
   auth:
     build:

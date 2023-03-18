@@ -31,4 +31,4 @@ services:
 
   auth_postgres:
     ports:
-      - "5432:54321"
+      - "54321:54321"
