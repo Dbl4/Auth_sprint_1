@@ -36,7 +36,16 @@ USERS_ROLES {
     created timestamp
 }
 
+REFRESH_TOKENS {
+    id uuid PK
+    user_id uuid
+    expires_at timestamp
+    user-agent string
+    user-ip string
+}
+
 AUTH_HISTORY }o--|| USERS: o
 USERS_ROLES }o--|| USERS: o
 USERS_ROLES }o--|| ROLES: o
+REFRESH_TOKENS }o--|| USERS: o
 ```

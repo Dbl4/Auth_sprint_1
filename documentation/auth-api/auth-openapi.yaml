@@ -108,7 +108,31 @@ paths:
           description: Действие разрешено самому пользователю и администратору
         '404':
           description: Пользователь не найден
-  
+    delete:
+      summary: Удаление аккаунта пользователя
+      description: Удаление аккаунта пользователь должен подтвердить
+        вводом текущего пароля.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  format: password
+      responses:
+        '204':
+          description: Аккаунт пользователя успешно удален
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Действие разрешено самому пользователю и администратору
+        '404':
+          description: Пользователь не найден
   
   /users/{user_id}/history/:
     get:
@@ -141,13 +165,16 @@ paths:
         '401':
           description: Требуется аутентификация
         '403':
-          description: Действие разрешено самому пользователю и администратору
+          description: Неверный пароль         
         '404':
           description: Пользователь не найден
   
   /users/{user_id}/roles/:
     get:
       summary: Получение списка ролей пользователя
+      description: Запрос возвращает список ролей пользователя. Используется только
+        администратором, так как для простого пользователя свои роли 
+        доступны внутри access-токена.
       parameters:
         - in: path
           required: true
@@ -270,12 +297,12 @@ paths:
         '404':
           description: Пользователь или роль не найдены
   
-  /login/:
+  /auth/login/:
     post:
       summary: Вход пользователя в систему, получение токенов
       description: Проверка пароля и выдача access и refresh токенов.
         Значения полей user-agent и user-ip сохраняются в auth-history,
-        а также записываются в JWT-токен, где их может использовать 
+        а также записываются в access токен, где их может использовать 
         прикладной сервис для дополнительной проверки запроса.
       requestBody:
         required: true
@@ -312,7 +339,7 @@ paths:
           description: Неверный пароль         
   
   
-  /refresh/:
+  /auth/refresh/:
     post:
       summary: Обновление access и refresh токенов
       requestBody:
@@ -342,7 +369,7 @@ paths:
         '403':
           description: refresh токен не найден
   
-  /logout/:
+  /auth/logout/:
     post:
       summary: Осуществление выхода пользователя
       description: Удаляет refresh токен, ассоциированный

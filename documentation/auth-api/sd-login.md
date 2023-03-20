@@ -7,7 +7,7 @@ sequenceDiagram
     actor Frontend
     participant Flask
 
-    Frontend ->> Flask: POST /login/(login, password, user_agent)
+    Frontend ->> Flask: POST /auth/login/(login, password, user-agent, user-ip)
 
     alt Пароль неверный
         Flask -) Frontend: 403

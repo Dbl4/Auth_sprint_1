@@ -7,7 +7,7 @@ sequenceDiagram
     actor Frontend
     participant Flask
 
-    Frontend ->> Flask: POST /refresh/(refresh-token)
+    Frontend ->> Flask: POST /auth/refresh/(refresh-token)
 
     alt refresh-токен не найден
         Flask --) Frontend: 403

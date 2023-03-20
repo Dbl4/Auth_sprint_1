@@ -7,7 +7,7 @@ sequenceDiagram
     actor Frontend
     participant Flask
 
-    Frontend ->> Flask: /logout
+    Frontend ->> Flask: /auth/logout
 
     alt Невалидный access-токен
         Flask --) Frontend: 400
