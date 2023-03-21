@@ -6,6 +6,13 @@
 
 Access токен реализован в формате JWT. Refresh токен реализован в виде UUID и хранится в Postgres. Это позволяет реализовать выход на всех устройствах. Также, при обновлении refresh токена в payload access токена обновляется информация о пользователе (список ролей).
 
+Доступ к PostgreSQL осуществляется с помощью библиотеки [Flask SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/3.0.x/). Для управления структурой базы используется [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest/).
+
+Основные команды Flask-Migrate:
+`flask db init` - начальная инициализация пакета, выполняется один раз.
+После изменения моделей необходимо создать файл с описанием миграции командой `flask db migrate`.
+Файл создается в папке `auth/migrations/versions`. Его надо просмотреть и поправить вручную. Выполнение миграции в базе данных запускается командой `flask db upgrade`.
+
 [ER-диаграмма PostgreSQL](auth-er-diagram.md)
 
 [Описание API в формате OpenAPI](auth-openapi.yaml)
