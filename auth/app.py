@@ -1,7 +1,7 @@
 from flask import Flask
 from db import db, init_db
 
-from models import User
+from models import User, Role
 from flask import Flask
 
 from settings import settings
@@ -30,9 +30,15 @@ def hello_world():
 
 
 def main():
-    # admin = User(password='admin', email='admin@example.com', is_admin=False)
-    # db.session.add(admin)
-    # db.session.commit()
+    role = Role(name='actor')
+    db.session.add(role)
+
+    user = User(password='admin', email='admin@example.com', is_admin=False)
+    user.roles.append(role)
+    db.session.add(user)
+
+    db.session.commit()
+
     app.run(host='0.0.0.0')
 
 
