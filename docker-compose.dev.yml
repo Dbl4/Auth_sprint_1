@@ -19,3 +19,16 @@ services:
   redis:
     ports:
       - "6379:6379"
+
+  auth:
+    ports:
+      - "5000:5000"
+    restart: 'no'
+
+  auth_redis:
+    ports:
+      - "6380:6379"
+
+  auth_postgres:
+    ports:
+      - "5433:5432"
