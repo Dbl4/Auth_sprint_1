@@ -1,11 +1,15 @@
-from db import db, init_db
-from flask import Flask
-from settings import auth_postgres_url
+from flask_jwt_extended import JWTManager
 
-from models import Role, User
+from db import init_db
+from flask import Flask
+from settings import auth_postgres_url, settings
 
 app = Flask(__name__)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = auth_postgres_url
+app.config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+
+jwt = JWTManager(app)
 
 app.app_context().push()
 init_db(app)
@@ -17,15 +21,6 @@ def hello_world():
 
 
 def main():
-    role = Role(name="actor")
-    db.session.add(role)
-
-    user = User(password="admin", email="admin@example.com", is_admin=False)
-    user.roles.append(role)
-    db.session.add(user)
-
-    db.session.commit()
-
     app.run(host="0.0.0.0", port=5000)
 
 
