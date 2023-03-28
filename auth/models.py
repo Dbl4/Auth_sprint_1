@@ -4,8 +4,6 @@ from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from db import db
 
-# op.execute("create schema auth")
-
 
 class User(db.Model):
     __tablename__ = "users"
