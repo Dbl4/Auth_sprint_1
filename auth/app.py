@@ -1,17 +1,14 @@
 from flask_jwt_extended import JWTManager
 
-from db import db, init_db
+from db import init_db
 from flask import Flask
-from settings import auth_postgres_url
-
-from models import Role, User
-from utils import hash_password, is_correct_password, create_tokens
+from settings import auth_postgres_url, settings
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = auth_postgres_url
 
-# Setup the Flask-JWT-Extended extension
-app.config["JWT_SECRET_KEY"] = "fd08b18e863a9635534b297cc39efe99a6f49cfae6a1f33eb21f9c3dc97c0466"
+app.config["SQLALCHEMY_DATABASE_URI"] = auth_postgres_url
+app.config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+
 jwt = JWTManager(app)
 
 app.app_context().push()
@@ -24,18 +21,6 @@ def hello_world():
 
 
 def main():
-    # role = Role(name="actor")
-    # db.session.add(role)
-    #
-    # user = User(password="admin", email="admin@example.com", is_admin=False)
-    # user.roles.append(role)
-    # db.session.add(user)
-    #
-    # db.session.commit()
-    print(hash_password('123456'))
-    print(is_correct_password(hash_password('123456'), '123476'))
-    print(create_tokens('test'))
-
     app.run(host="0.0.0.0", port=5000)
 
 

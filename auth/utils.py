@@ -1,8 +1,7 @@
 import hashlib
 import os
 
-from flask_jwt_extended import (create_access_token,
-                                create_refresh_token)
+from flask_jwt_extended import create_access_token, create_refresh_token
 
 
 def hash_password(password: str) -> str:
@@ -13,7 +12,9 @@ def hash_password(password: str) -> str:
 
 def is_correct_password(correct_password: str, entered_password: str) -> bool:
     salt, correct_pw_hash = correct_password.split("&")
-    entered_pw_hash = hashlib.pbkdf2_hmac("sha256", entered_password.encode("utf-8"), bytes.fromhex(salt), 100000)
+    entered_pw_hash = hashlib.pbkdf2_hmac(
+        "sha256", entered_password.encode("utf-8"), bytes.fromhex(salt), 100000
+    )
     if correct_pw_hash == str(entered_pw_hash.hex()):
         return True
     return False
@@ -26,6 +27,6 @@ def create_tokens(identity: str) -> tuple[str, str]:
 
 
 def is_correct_token():
+    # в базе будут храниться токены, будем проверять,
+    # есть ли приходящий рефреш токен в базе.
     pass
-
-
