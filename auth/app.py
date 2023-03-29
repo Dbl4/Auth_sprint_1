@@ -4,6 +4,8 @@ from db import init_db
 from flask import Flask
 from settings import auth_postgres_url, settings
 
+from commands import register_commands
+
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = auth_postgres_url
@@ -13,7 +15,7 @@ jwt = JWTManager(app)
 
 app.app_context().push()
 init_db(app)
-
+register_commands(app)
 
 @app.route("/hello")
 def hello_world():
