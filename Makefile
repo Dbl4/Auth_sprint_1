@@ -37,5 +37,5 @@ loaddata:
 	docker-compose exec postgres psql -h 127.0.0.1 -U app -d movies_database -f /var/lib/postgresql/movies_database.sql
 
 
-create-superuser:
-	docker-compose exec auth python commands.py ${SUPERUSER_EMAIL} ${SUPERUSER_PASSWORD}
+authadmin:
+	docker-compose exec auth flask create-superuser

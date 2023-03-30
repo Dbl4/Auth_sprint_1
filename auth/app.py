@@ -6,6 +6,8 @@ from flask import Flask
 
 from settings import auth_postgres_url, settings
 
+from commands import register_commands
+
 app = Flask(__name__)
 app.register_blueprint(auth)
 
@@ -16,7 +18,7 @@ jwt = JWTManager(app)
 
 app.app_context().push()
 init_db(app)
-
+register_commands(app)
 
 @app.route("/hello")
 def hello_world():
