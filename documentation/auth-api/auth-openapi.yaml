@@ -110,6 +110,13 @@ paths:
           description: Пользователь не найден
     delete:
       summary: Удаление аккаунта пользователя
+      parameters:
+        - in: path
+          required: true
+          name: user_id
+          schema:
+            type: string
+            format: uuid
       description: Удаление аккаунта пользователь должен подтвердить
         вводом текущего пароля.
       requestBody:
@@ -402,7 +409,7 @@ paths:
   
   /roles/:
     get:
-      description: Получить полный список ролей
+      summary: Получение полного списка ролей
       responses:
         '200':
           description: success
@@ -422,7 +429,7 @@ paths:
         '403':
           description: Действие разрешено администратору
     post:
-      description: Создание роли
+      summary: Создание роли
       requestBody:
         required: true
         content:
@@ -452,7 +459,7 @@ paths:
 
   /roles/{role_id}/:
     put:
-      description: Переименовать роль
+      summary: Переименование роли
       parameters:
         - in: path
           required: true
@@ -479,6 +486,7 @@ paths:
         '404':
           description: Роль не найдена
     delete:
+      summary: Удаление роли
       parameters:
         - in: path
           required: true
