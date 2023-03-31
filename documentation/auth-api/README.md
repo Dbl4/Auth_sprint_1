@@ -7,6 +7,8 @@
 Управлять ролями может только администратор. Пароль администратора выдается только доверенному сервису. Это позволяет ограничить риски несанкционированного использования сервиса при условии свободного доступа к API.
 
 Access токен реализован в формате [JWT](https://datatracker.ietf.org/doc/html/rfc7519).
+Передается access-токен в поле Bearer заголовка запроса:
+```Authorization: Bearer <token>```
 Поля payload токена:
 - [sub](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2) - user_id, идентификатор пользователя в формате UUID . Соответствует полю `USERS.id`.
 - email - email пользователя. Соответствует полю `USERS.email`.
@@ -52,8 +54,8 @@ class User
 class RefreshToken
 class AccessToken
 
-User "1" --> "*" RefreshToken
-RefreshToken "1" --> "1" AccessToken
+User "1" --> "*" RefreshToken : user_id
+RefreshToken "1" --> "1" AccessToken : jti
 ```
 
 Refresh-токен реализован в виде UUID и хранится в Redis. Ключ хранения содержит ID пользователя и ID access-токена. Формат записи refresh-токена в Redis:

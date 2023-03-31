@@ -9,7 +9,7 @@ sequenceDiagram
     participant Flask
 
     Frontend ->> FastAPI: access token
-    FastAPI ->> Flask: GET /users/{user_id}/check/(access token)
+    FastAPI ->> Flask: GET /auth/check/(access token)
 
     alt access-токен просрочен (time > exp)
         Flask --) FastAPI: 403 Forbidden
@@ -25,7 +25,7 @@ sequenceDiagram
     end
 ```
 
-При получении запроса прикладной сервис проверяет приложенный 
+При получении запроса пользователя фронтэнд проверяет приложенный 
 к запросу access токен, делая запрос к сервису Auth API. Auth API
 проверяет идентификатор пользователя и подпись токена не совершая запрос
 к базе данных, что снижает нагрузку на систему.
