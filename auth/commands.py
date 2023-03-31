@@ -19,7 +19,6 @@ def register_commands(app):
     def create_superuser(email: str, password: str) -> None:
         """Создать суперпользователя"""
 
-        print(email)
         superuser = User(password=hash_password(password), email=email, is_admin=True)
         db.session.add(superuser)
         db.session.commit()
