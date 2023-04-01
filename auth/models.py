@@ -76,26 +76,6 @@ class AuthHistory(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
-class RefreshToken(db.Model):
-    __tablename__ = "refresh_tokens"
-    __table_args__ = {"schema": "auth"}
-
-    id = db.Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        nullable=False,
-    )
-    user_id = db.Column(
-        UUID(as_uuid=True),
-        db.ForeignKey("auth.users.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-    expires_at = db.Column(db.DateTime, nullable=False)
-    user_agent = db.Column(db.String, nullable=False)
-    user_ip = db.Column(db.String, nullable=False)
-
-
 users_roles = db.Table(
     "users_roles",
     db.Column(

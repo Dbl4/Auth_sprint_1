@@ -7,6 +7,7 @@ from flask import Flask
 from settings import auth_postgres_url, settings
 
 from commands import register_commands
+from models import User, Role
 
 app = Flask(__name__)
 app.register_blueprint(auth)
