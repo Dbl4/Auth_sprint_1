@@ -124,9 +124,6 @@ paths:
     delete:
       summary: Удаление аккаунта пользователя
       description: Доступно самому пользователю и администратору.
-        Удаление аккаунта пользователь должен подтвердить вводом
-        текущего пароля. Если запрос сделал администратор,
-        пароль не проверяется.
       tags:
         - users
       parameters:
@@ -136,18 +133,6 @@ paths:
           schema:
             type: string
             format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - password
-              properties:
-                password:
-                  type: string
-                  format: password
       security:
         - bearerAuth: []
       responses:
@@ -426,28 +411,9 @@ paths:
     post:
       summary: Осуществление выхода пользователя
       description: Доступно пользователю.
-        Удаляет refresh токен, ассоциированный с полученным
-        access-токеном. Access токен надо передавать в теле,
-        а не в заголовке.
+        Удаляет refresh токен, ассоциированный с полученным access-токеном.
       tags:
         - auth
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - access_token
-              properties:
-                access_token:
-                  type: string
-                  format: jwt
-                  description: JWT токен
-                everywhere:
-                  description: Выйти на всех устройствах
-                  type: boolean
-                  default: false
       security:
         - bearerAuth: []
       responses:
@@ -458,6 +424,23 @@ paths:
         '404':
           description: Пользователь не найден
   
+  /auth/logout-all/:
+    post:
+      summary: Осуществление выхода пользователя на всех устройствах
+      description: Доступно пользователю.
+        Удаляет все refresh токены, ассоциированные с пользователем.
+      tags:
+        - auth
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Успешный выход
+        '403':
+          description: Действие разрешено самому пользователю и администратору
+        '404':
+          description: Пользователь не найден
+          
   /roles/:
     get:
       summary: Получение полного списка ролей
