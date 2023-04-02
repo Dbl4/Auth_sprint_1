@@ -3,6 +3,9 @@ from db import db, init_db
 from urllib.parse import urlunsplit
 
 from models import User, Role
+from api.v1.users import auth
+from api.v1.roles import roles
+from db import init_db
 from flask import Flask
 
 from settings import settings
@@ -22,6 +25,13 @@ app.config["SQLALCHEMY_DATABASE_URI"] = urlunsplit(
         "",
     ),
 )
+app.register_blueprint(auth)
+app.register_blueprint(roles)
+
+app.config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+jwt = JWTManager(app)
+app.register_blueprint(auth)
+app.register_blueprint(roles)
 
 app.app_context().push()
 init_db(app)
