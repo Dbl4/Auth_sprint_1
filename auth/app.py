@@ -1,34 +1,20 @@
 from flask import Flask
-from urllib.parse import urlunsplit
+from sqlalchemy.engine import URL
 
 from commands import register_commands
 from settings import settings
+from db import db, migrate
 
 
-def create_app(config_filename):
+def create_app(config):
     app = Flask(__name__)
-    # app.config.from_pyfile(config_filename)
-    app.config["SQLALCHEMY_DATABASE_URI"] = urlunsplit(
-        (
-            "postgresql",
-            (
-                f"{settings.auth_postgres_user}"
-                f":{settings.auth_postgres_password}"
-                f"@{settings.auth_postgres_host}"
-                f":{settings.auth_postgres_port}"
-            ),
-            settings.auth_postgres_db,
-            "",
-            "",
-        ),
-    )
-    app.config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+    app.config.update(**config)
 
     register_commands(app)
 
-    from db import init_db
-    init_db(app)
-
+    from models import User, Role
+    db.init_app(app)
+    migrate.init_app(app, db)
     from api.v1.users import auth
     from api.v1.roles import roles
     app.register_blueprint(auth)
@@ -36,7 +22,17 @@ def create_app(config_filename):
 
     return app
 
-app = create_app(None)
+config = {}
+config["SQLALCHEMY_DATABASE_URI"] = URL.create(
+    drivername="postgresql",
+    username=settings.auth_postgres_user,
+    password=settings.auth_postgres_password,
+    host=settings.auth_postgres_host,
+    port=settings.auth_postgres_port,
+    database=settings.auth_postgres_db
+)
+config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+app = create_app(config)
 
 @app.route("/hello")
 def hello_world():
