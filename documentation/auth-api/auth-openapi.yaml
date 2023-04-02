@@ -8,6 +8,11 @@ paths:
   /users/:
     get:
       summary: Получение списка пользователей
+      description: Доступно администратору
+      tags:
+        - users
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Успешный ответ со списком пользователей
@@ -43,6 +48,9 @@ paths:
         В базе данных создается запись о новом пользователе.
         Вход в систему не производится, для входа надо отдельно
         вызвать POST /tokens/.
+        Доступно всем.
+      tags:
+        - users
       requestBody:
         required: true
         content:
@@ -80,6 +88,9 @@ paths:
   /users/{user_id}/:
     patch:
       summary: Изменение данных пользователя
+      description: Доступно самому пользователю и администратору
+      tags:
+        - users
       parameters:
         - in: path
           required: true
@@ -99,6 +110,8 @@ paths:
                   format: email
                 password:
                   type: string
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Успешное обновление данных
@@ -110,20 +123,18 @@ paths:
           description: Пользователь не найден
     delete:
       summary: Удаление аккаунта пользователя
-      description: Удаление аккаунта пользователь должен подтвердить
-        вводом текущего пароля.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - password
-              properties:
-                password:
-                  type: string
-                  format: password
+      description: Доступно самому пользователю и администратору.
+      tags:
+        - users
+      parameters:
+        - in: path
+          required: true
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
       responses:
         '204':
           description: Аккаунт пользователя успешно удален
@@ -137,6 +148,9 @@ paths:
   /users/{user_id}/history/:
     get:
       summary: Получение истории входов пользователя
+      description: Доступно самому пользователю и администратору
+      tags:
+        - users
       parameters:
         - in: path
           required: true
@@ -144,6 +158,8 @@ paths:
           schema:
             type: string
             format: uuid
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: success
@@ -172,9 +188,11 @@ paths:
   /users/{user_id}/roles/:
     get:
       summary: Получение списка ролей пользователя
-      description: Запрос возвращает список ролей пользователя. Используется только
-        администратором, так как для простого пользователя свои роли 
-        доступны внутри access-токена.
+      description: Доступно администратору.
+        Используется только администратором, так как для простого
+        пользователя свои роли доступны внутри access-токена.
+      tags:
+        - users
       parameters:
         - in: path
           required: true
@@ -182,6 +200,8 @@ paths:
           schema:
             type: string
             format: uuid
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Вывод списка ролей пользователя
@@ -209,6 +229,9 @@ paths:
           description: Пользователь не найден
     put:
       summary: Добавление пользователю роли
+      description: Доступно администратору
+      tags:
+        - users
       parameters:
         - in: path
           required: true
@@ -227,9 +250,11 @@ paths:
                   type: string
                   format: uuid
                   description: role id
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: Successful login
+          description: Роль добавлена
           content:
             application/json:
               schema:
@@ -249,31 +274,12 @@ paths:
         '404':
           description: Пользователь не найден
           
-  /users/{user_id}/check/:
-    get:
-      summary: Проверка JWT-токена
-      description: При необходимости аутентификации пользователя прикладной сервис
-        делает этот запрос с указанием JWT-токена в заголовке.
-      parameters:
-        - in: path
-          required: true
-          name: user_id
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: JWT-токен валиден
-        '401':
-          description: JWT-токен просрочен
-        '403':
-          description: Подпись JWT-токена неверная
-        '404':
-          description: Пользователь не найден
-
   /users/{user_id}/roles/{role_id}/:
     delete:
       summary: Отмена роли у пользователя
+      description: Доступно администратору
+      tags:
+        - users
       parameters:
         - in: path
           required: true
@@ -287,6 +293,8 @@ paths:
           schema:
             type: string
             format: uuid
+      security:
+        - bearerAuth: []
       responses:
         '204':
           description: Роль успешно удалена
@@ -297,6 +305,7 @@ paths:
         '404':
           description: Пользователь или роль не найдены
   
+  
   /auth/login/:
     post:
       summary: Вход пользователя в систему, получение токенов
@@ -304,6 +313,9 @@ paths:
         Значения полей user-agent и user-ip сохраняются в auth-history,
         а также записываются в access токен, где их может использовать 
         прикладной сервис для дополнительной проверки запроса.
+        Доступно всем.
+      tags:
+        - auth
       requestBody:
         required: true
         content:
@@ -339,9 +351,33 @@ paths:
           description: Неверный пароль         
   
   
+  /auth/check/:
+    get:
+      summary: Проверка JWT-токена
+      description: Доступно пользователю.
+        При необходимости аутентификации пользователя прикладной
+        сервис делает этот запрос с указанием JWT-токена в заголовке.
+      tags:
+        - auth
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: JWT-токен валиден
+        '401':
+          description: JWT-токен просрочен
+        '403':
+          description: Подпись JWT-токена неверная
+        '404':
+          description: Пользователь не найден
+
+
   /auth/refresh/:
     post:
       summary: Обновление access и refresh токенов
+      description: Доступно пользователю
+      tags:
+        - auth
       requestBody:
         required: true
         content:
@@ -354,6 +390,8 @@ paths:
                 refresh:
                   type: string
                   description: refresh токен
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Успешное обновление токенов
@@ -372,26 +410,12 @@ paths:
   /auth/logout/:
     post:
       summary: Осуществление выхода пользователя
-      description: Удаляет refresh токен, ассоциированный
-        с полученным access токеном. Access токен надо передавать
-        в теле, а не в заголовке.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - access_token
-              properties:
-                access_token:
-                  type: string
-                  format: jwt
-                  description: JWT токен
-                everywhere:
-                  description: Выйти на всех устройствах
-                  type: boolean
-                  default: false
+      description: Доступно пользователю.
+        Удаляет refresh токен, ассоциированный с полученным access-токеном.
+      tags:
+        - auth
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Успешный выход
@@ -400,9 +424,31 @@ paths:
         '404':
           description: Пользователь не найден
   
+  /auth/logout-all/:
+    post:
+      summary: Осуществление выхода пользователя на всех устройствах
+      description: Доступно пользователю.
+        Удаляет все refresh токены, ассоциированные с пользователем.
+      tags:
+        - auth
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Успешный выход
+        '403':
+          description: Действие разрешено самому пользователю и администратору
+        '404':
+          description: Пользователь не найден
+          
   /roles/:
     get:
-      description: Получить полный список ролей
+      summary: Получение полного списка ролей
+      description: Доступно администратору
+      tags:
+        - roles
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: success
@@ -422,7 +468,10 @@ paths:
         '403':
           description: Действие разрешено администратору
     post:
-      description: Создание роли
+      summary: Создание роли
+      description: Доступно администратору
+      tags:
+        - roles
       requestBody:
         required: true
         content:
@@ -432,6 +481,8 @@ paths:
               properties:
                 name:
                   type: string
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: success
@@ -452,7 +503,10 @@ paths:
 
   /roles/{role_id}/:
     put:
-      description: Переименовать роль
+      summary: Переименование роли
+      description: Доступно администратору
+      tags:
+        - roles
       parameters:
         - in: path
           required: true
@@ -469,6 +523,8 @@ paths:
               properties:
                 name:
                   type: string
+      security:
+        - bearerAuth: []
       responses:
         '204':
           description: Роль переименована
@@ -479,6 +535,10 @@ paths:
         '404':
           description: Роль не найдена
     delete:
+      summary: Удаление роли
+      description: Доступно администратору
+      tags:
+        - roles
       parameters:
         - in: path
           required: true
@@ -486,6 +546,8 @@ paths:
           schema:
             type: string
             format: uuid
+      security:
+        - bearerAuth: []
       responses:
         '204':
           description: Роль удалена
@@ -495,3 +557,10 @@ paths:
           description: Действие разрешено администратору
         '404':
           description: Роль не найдена
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

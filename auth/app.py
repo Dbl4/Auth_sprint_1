@@ -1,7 +1,13 @@
+from flask_jwt_extended import JWTManager
+
+from api.v1.users import auth
+from db import init_db
 from flask import Flask
-from db import db, init_db
 from urllib.parse import urlunsplit
 
+from settings import auth_postgres_url, settings
+
+from commands import register_commands
 from models import User, Role
 from api.v1.users import auth
 from api.v1.roles import roles
@@ -35,7 +41,7 @@ app.register_blueprint(roles)
 
 app.app_context().push()
 init_db(app)
-
+register_commands(app)
 
 @app.route("/hello")
 def hello_world():
@@ -43,15 +49,6 @@ def hello_world():
 
 
 def main():
-    role = Role(name="actor")
-    db.session.add(role)
-
-    user = User(password="admin", email="admin@example.com", is_admin=False)
-    user.roles.append(role)
-    db.session.add(user)
-
-    db.session.commit()
-
     app.run(host="0.0.0.0", port=5000)
 
 
