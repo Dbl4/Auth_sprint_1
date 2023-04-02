@@ -1,8 +1,9 @@
 from flask import Flask
 from urllib.parse import urlunsplit
 
-from auth.models import User, Role
-from auth.db import db, init_db
+from app import create_app
+from models import User, Role
+from db import db, init_db
 
 def test_multiple_roles():
     """
@@ -10,24 +11,8 @@ def test_multiple_roles():
     WHEN the same role is assigned once again
     THEN that an error is raised
     """
-    # app = Flask(__name__)
-    # app.config["SQLALCHEMY_DATABASE_URI"] = urlunsplit(
-    #     (
-    #         "postgresql",
-    #         (
-    #             f"{settings.auth_postgres_user}"
-    #             f":{settings.auth_postgres_password}"
-    #             f"@{settings.auth_postgres_host}"
-    #             f":{settings.auth_postgres_port}"
-    #         ),
-    #         settings.auth_postgres_db,
-    #         "",
-    #         "",
-    #     ),
-    # )
-
-    # app.app_context().push()
-    # init_db(app)
+    app = create_app(None)
+    app.app_context().push()
 
     role = Role(name='actor')
     db.session.add(role)
