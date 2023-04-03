@@ -39,13 +39,6 @@ def db(app, request):
 
     def teardown():
         flask_migrate_downgrade(directory="migrations")
-<<<<<<< HEAD
-<<<<<<< HEAD
-        # _db.drop_all()
-=======
->>>>>>> cd0c6dc (02 tests (#11))
-=======
->>>>>>> 526a2c5 (Prepare tests for usage)
     _db.app = app
 
     flask_migrate_upgrade(directory="migrations")
