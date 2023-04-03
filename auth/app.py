@@ -1,6 +1,6 @@
 from flask_jwt_extended import JWTManager
 
-from api.v1.users import auth
+from api import v1
 from db import init_db
 from flask import Flask
 
@@ -10,7 +10,7 @@ from commands import register_commands
 from models import User, Role
 
 app = Flask(__name__)
-app.register_blueprint(auth)
+app.register_blueprint(v1)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = auth_postgres_url
 app.config["JWT_SECRET_KEY"] = settings.jwt_secret_key
@@ -20,6 +20,7 @@ jwt = JWTManager(app)
 app.app_context().push()
 init_db(app)
 register_commands(app)
+
 
 @app.route("/hello")
 def hello_world():
