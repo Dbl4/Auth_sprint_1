@@ -5,6 +5,25 @@ from db import db
 from sqlalchemy.dialects.postgresql import UUID
 
 
+users_roles = db.Table(
+    "users_roles",
+    db.Column(
+        "user_id",
+        db.ForeignKey("auth.users.id"),
+        primary_key=True,
+        nullable=False,
+    ),
+    db.Column(
+        "role_id",
+        db.ForeignKey("auth.roles.id"),
+        primary_key=True,
+        nullable=False,
+    ),
+    db.Column("created", db.DateTime, default=datetime.utcnow, nullable=False),
+    db.UniqueConstraint("user_id", "role_id"),
+    schema="auth",
+)
+
 class User(db.Model):
     __tablename__ = "users"
     __table_args__ = {"schema": "auth"}
@@ -23,12 +42,12 @@ class User(db.Model):
     modified = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     roles = db.relationship(
         "Role",
-        secondary="auth.users_roles",
+        secondary=users_roles,
         back_populates="users",
     )
 
     def __repr__(self):
-        return f"<User {self.login}>"
+        return f"<User {self.email}>"
 
 
 class Role(db.Model):
@@ -47,12 +66,16 @@ class Role(db.Model):
     modified = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     users = db.relationship(
         "User",
-        secondary="auth.users_roles",
+        secondary=users_roles,
         back_populates="roles",
     )
+    db.UniqueConstraint("name"),
 
     def __repr__(self):
-        return f"<User {self.login}>"
+        return f"<Role {self.name}>"
+
+    def to_json(self):
+        return {"id": self.id, "name": self.name}
 
 
 class AuthHistory(db.Model):
@@ -74,23 +97,3 @@ class AuthHistory(db.Model):
     user_ip = db.Column(db.String, nullable=False)
     action = db.Column(db.String, nullable=True)
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-
-
-users_roles = db.Table(
-    "users_roles",
-    db.Column(
-        "user_id",
-        db.ForeignKey(User.id),
-        primary_key=True,
-        nullable=False,
-    ),
-    db.Column(
-        "role_id",
-        db.ForeignKey(Role.id),
-        primary_key=True,
-        nullable=False,
-    ),
-    db.Column("created", db.DateTime, default=datetime.utcnow, nullable=False),
-    db.UniqueConstraint("user_id", "role_id"),
-    schema="auth",
-)
