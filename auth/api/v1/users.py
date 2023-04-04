@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import Blueprint, jsonify, abort, request
+from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.v1.api_forms import spec, SignupForm
