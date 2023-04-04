@@ -2,10 +2,9 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 
 from api import v1
-from sqlalchemy.engine import URL
 
 from commands import register_commands
-from settings import settings
+from settings import settings, config, auth_postgres_url
 from db import db, migrate
 
 
@@ -23,15 +22,7 @@ def create_app(config):
     return app
 
 
-config = {}
-config["SQLALCHEMY_DATABASE_URI"] = URL.create(
-    drivername="postgresql",
-    username=settings.auth_postgres_user,
-    password=settings.auth_postgres_password,
-    host=settings.auth_postgres_host,
-    port=settings.auth_postgres_port,
-    database=settings.auth_postgres_db
-)
+config["SQLALCHEMY_DATABASE_URI"] = auth_postgres_url
 config["JWT_SECRET_KEY"] = settings.jwt_secret_key
 app = create_app(config)
 
