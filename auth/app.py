@@ -21,9 +21,9 @@ def create_app(config):
     from models import User, Role
     db.init_app(app)
     migrate.init_app(app, db)
-    from api.v1.users import auth
+    from api.v1.users import users
     from api.v1.roles import roles
-    app.register_blueprint(auth)
+    app.register_blueprint(users)
     app.register_blueprint(roles)
 
     return app
@@ -39,10 +39,6 @@ config["SQLALCHEMY_DATABASE_URI"] = URL.create(
 )
 config["JWT_SECRET_KEY"] = settings.jwt_secret_key
 app = create_app(config)
-
-@app.route("/hello")
-def hello_world():
-    return "Hello, World!"
 
 
 def main():

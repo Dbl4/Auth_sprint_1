@@ -1,35 +1,43 @@
 from flask import Flask
 from urllib.parse import urlunsplit
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 import pytest
 >>>>>>> cd0c6dc (02 tests (#11))
+=======
+import pytest
+>>>>>>> 526a2c5 (Prepare tests for usage)
 
 from app import create_app
 from models import User, Role
 from db import db, migrate
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def test_multiple_roles(session):
+=======
+from sqlalchemy.exc import IntegrityError
+
+def test_duplicate_roles(session):
+>>>>>>> 526a2c5 (Prepare tests for usage)
     """
-    GIVEN a user with a role assigned
-    WHEN the same role is assigned once again
-    THEN that an error is raised
+    GIVEN a role with a certain name exists
+    WHEN a role with the same name is added
+    THEN an exception is raised
     """
-    role1 = Role(name="actor")
-    role2 = Role(name="actor")
-    session.add(role1)
-    # session.add(role2)
+    role = Role(name="actor")
+    session.add(role)
     session.commit()
 
-    # user = User(password="admin", email="admin@example.com", is_admin=False)
-    # user.roles.append(role1)
-    # user.roles.append(role1)
-    # user.roles.append(role2)
-    # db.session.add(user)
+    with pytest.raises(IntegrityError) as excinfo:
+        role2 = Role(name="actor")
+        session.add(role2)
+        session.commit()
+    assert "duplicate key" in str(excinfo.value)
 
-    # db.session.commit()
 
+<<<<<<< HEAD
     # user = User('patkennedy79@gmail.com', 'FlaskIsAwesome')
     # assert user.email == 'patkennedy79@gmail.com'
     # assert user.hashed_password != 'FlaskIsAwesome'
@@ -54,6 +62,8 @@ def test_duplicate_roles(session):
     assert "duplicate key" in str(excinfo.value)
 
 
+=======
+>>>>>>> 526a2c5 (Prepare tests for usage)
 def test_assign_role_twice(session):
     """
     GIVEN user has a certain role
@@ -77,4 +87,7 @@ def test_assign_role_twice(session):
     #     user.roles.append(role)
     #     session.commit()
     # assert "duplicate key" in str(excinfo.value)
+<<<<<<< HEAD
 >>>>>>> cd0c6dc (02 tests (#11))
+=======
+>>>>>>> 526a2c5 (Prepare tests for usage)
