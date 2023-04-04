@@ -24,7 +24,6 @@ users_roles = db.Table(
     schema="auth",
 )
 
-
 class User(db.Model):
     __tablename__ = "users"
     __table_args__ = {"schema": "auth"}
@@ -48,7 +47,7 @@ class User(db.Model):
     )
 
     def __repr__(self):
-        return f"<User {self.login}>"
+        return f"<User {self.email}>"
 
 
 class Role(db.Model):
@@ -73,7 +72,10 @@ class Role(db.Model):
     db.UniqueConstraint("name"),
 
     def __repr__(self):
-        return f"<User {self.login}>"
+        return f"<Role {self.name}>"
+
+    def to_json(self):
+        return {"id": self.id, "name": self.name}
 
 
 class AuthHistory(db.Model):

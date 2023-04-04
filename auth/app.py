@@ -1,5 +1,6 @@
 from flask import Flask
 from sqlalchemy.engine import URL
+from flask_cors import CORS
 
 from commands import register_commands
 from settings import settings
@@ -8,6 +9,7 @@ from db import db, migrate
 
 def create_app(config):
     app = Flask(__name__)
+    CORS(app)
     app.config.update(**config)
 
     register_commands(app)
