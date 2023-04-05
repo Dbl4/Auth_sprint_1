@@ -2,7 +2,6 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 
 from api import v1
-from sqlalchemy.engine import URL
 from flask_cors import CORS
 
 from commands import register_commands
@@ -27,6 +26,7 @@ def create_app(config):
 
 config["SQLALCHEMY_DATABASE_URI"] = auth_postgres_url
 config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+config["JWT_ENCODE_NBF"] = False
 app = create_app(config)
 
 
