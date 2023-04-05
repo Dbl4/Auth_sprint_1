@@ -21,7 +21,10 @@ Access токен реализован в формате [JWT](https://datatrack
     "email": "<email пользователя>",
     "roles": ["<роль 1>", "<роль 2>", ...],
     "exp": "<время окончания действия access-токена>",
-    "jti": "<идентификатор access-токена>"
+    "jti": "<идентификатор access-токена>",
+    "userAgent": "<браузер клиента>",
+    "userIP": "<IP адрес клиента>",
+    "admin": "<boolean>"
 }
 ```
 
@@ -32,7 +35,10 @@ Access токен реализован в формате [JWT](https://datatrack
     "email": "user@example.com",
     "roles": ["subscriber", "adult"],
     "exp": 1516239022,
-    "jti": "0bb71cc9-325d-49b7-a154-f5e3b0d5c4b9"
+    "jti": "0bb71cc9-325d-49b7-a154-f5e3b0d5c4b9",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0",
+    "userIP": "127.0.0.1",
+    "admin": 1
 }
 ```
 

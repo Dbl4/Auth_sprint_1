@@ -2,6 +2,8 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 
 from api import v1
+from sqlalchemy.engine import URL
+from flask_cors import CORS
 
 from commands import register_commands
 from settings import settings, config, auth_postgres_url
@@ -10,6 +12,7 @@ from db import db, migrate
 
 def create_app(config):
     app = Flask(__name__)
+    CORS(app)
     app.config.update(**config)
     jwt = JWTManager(app)
 

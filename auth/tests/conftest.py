@@ -39,7 +39,6 @@ def db(app, request):
 
     def teardown():
         flask_migrate_downgrade(directory="migrations")
-        # _db.drop_all()
     _db.app = app
 
     flask_migrate_upgrade(directory="migrations")
