@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from api.v1.api_forms import spec, RolesPost
+from api.v1.api_models import spec, RolesPost
 
 from db import db
 from models import Role

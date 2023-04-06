@@ -2,7 +2,7 @@ from spectree import SpecTree
 from pydantic import BaseModel, validator
 
 
-class SignupForm(BaseModel):
+class AuthSignup(BaseModel):
     email: str
     password: str
 
@@ -16,4 +16,5 @@ class RolesPost(BaseModel):
             raise ValueError('Название роли не может быть пустым')
         return v
 
-spec = SpecTree("flask")
+
+spectree = SpecTree("flask")

@@ -1,11 +1,21 @@
+from flask_jwt_extended import JWTManager
+
+from api import v1
+from db import init_db
 from flask import Flask
+from flask_jwt_extended import JWTManager
+
+from api import v1
+
+from settings import settings, config, auth_postgres_url
 from sqlalchemy.engine import URL
 from flask_cors import CORS
 
 from commands import register_commands
-from settings import settings
 from db import db, migrate
 
+app = Flask(__name__)
+app.register_blueprint(v1)
 
 def create_app(config):
     app = Flask(__name__)
@@ -17,9 +27,9 @@ def create_app(config):
     from models import User, Role
     db.init_app(app)
     migrate.init_app(app, db)
-    from api.v1.users import auth
+    from api.v1.users import users
     from api.v1.roles import roles
-    app.register_blueprint(auth)
+    app.register_blueprint(users)
     app.register_blueprint(roles)
 
     return app
@@ -35,10 +45,6 @@ config["SQLALCHEMY_DATABASE_URI"] = URL.create(
 )
 config["JWT_SECRET_KEY"] = settings.jwt_secret_key
 app = create_app(config)
-
-@app.route("/hello")
-def hello_world():
-    return "Hello, World!"
 
 
 def main():
