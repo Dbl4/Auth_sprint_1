@@ -5,12 +5,14 @@ from models import User
 from utils import hash_password
 from email_validator import validate_email, EmailNotValidError
 
+
 def email_callback(ctx, param, value):
     try:
         email = validate_email(value).email
     except EmailNotValidError as e:
         raise click.BadParameter(str(e))
     return email
+
 
 def register_commands(app):
     @app.cli.command("create-superuser")

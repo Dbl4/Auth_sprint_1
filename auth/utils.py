@@ -1,7 +1,18 @@
 import hashlib
 import os
+import uuid
+from datetime import timedelta
 
+from email_validator import validate_email, EmailNotValidError
+from flask import abort
 from flask_jwt_extended import create_access_token, create_refresh_token
+
+
+def is_valid_email(email: str) -> str:
+    try:
+        return validate_email(email).email
+    except EmailNotValidError as err:
+        abort(422, description="Email is not valid.")
 
 
 def hash_password(password: str) -> str:
@@ -20,9 +31,13 @@ def is_correct_password(correct_password: str, entered_password: str) -> bool:
     return False
 
 
-def create_tokens(identity: str) -> tuple[str, str]:
-    access_token = create_access_token(identity=identity)
-    refresh_token = create_refresh_token(identity=identity)
+def create_tokens(identity: str, additional_claims: dict) -> tuple[str, str]:
+    access_token = create_access_token(
+        identity=identity,
+        additional_claims=additional_claims,
+        expires_delta=timedelta(minutes=5)
+    )
+    refresh_token = uuid.uuid4()
     return access_token, refresh_token
 
 

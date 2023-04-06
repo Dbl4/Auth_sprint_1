@@ -1,4 +1,5 @@
 from pydantic import BaseSettings, Field
+from sqlalchemy.engine import URL
 
 
 class Settings(BaseSettings):
@@ -12,15 +13,13 @@ class Settings(BaseSettings):
 
 settings = Settings(_env_file=".env", _env_file_encoding="utf-8")
 
-auth_postgres_url = (
-    "postgresql://"
-    + settings.auth_postgres_user
-    + ":"
-    + settings.auth_postgres_password
-    + "@"
-    + settings.auth_postgres_host
-    + ":"
-    + str(settings.auth_postgres_port)
-    + "/"
-    + settings.auth_postgres_db
+config = {}
+
+auth_postgres_url = URL.create(
+    drivername="postgresql",
+    username=settings.auth_postgres_user,
+    password=settings.auth_postgres_password,
+    host=settings.auth_postgres_host,
+    port=settings.auth_postgres_port,
+    database=settings.auth_postgres_db
 )
