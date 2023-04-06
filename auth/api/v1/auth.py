@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request
@@ -7,15 +6,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from db import db
 from models import User, AuthHistory, Role
 from utils import create_tokens, is_valid_email, is_correct_password
-=======
-from flask import Blueprint, jsonify, abort, request
->>>>>>> 2ea87f3 (Добавил signup, change)
 
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 @auth.route("/login/", methods=["POST"])
-<<<<<<< HEAD
 def login():
     email = is_valid_email(request.json.get("email"))
     password = request.json.get("password")
@@ -46,7 +41,7 @@ def login():
             jsonify(message="Login or password is incorrect"),
             HTTPStatus.BAD_REQUEST,
         )
-=======
+    
+
 def signup():
     return jsonify(message="User is authorized.")
->>>>>>> 2ea87f3 (Добавил signup, change)
