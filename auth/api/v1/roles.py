@@ -16,6 +16,7 @@ def get():
     return jsonify(roles)
 
 
+@spec.validate(json=RolesPost)
 @roles.post("/")
 @spectree.validate(json=RolesPost)
 def post():
@@ -28,6 +29,7 @@ def post():
     return jsonify(role.to_json())
 
 
+@spec.validate(json=RolesPost)
 @roles.put("/<uuid:role_id>/")
 @spectree.validate(json=RolesPost)
 def put(role_id):
