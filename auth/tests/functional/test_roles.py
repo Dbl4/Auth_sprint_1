@@ -1,6 +1,5 @@
 from app import create_app
 
-
 def test_create_role(test_client):
     """
     GIVEN 
