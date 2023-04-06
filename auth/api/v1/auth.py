@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from db import db
 from models import User, AuthHistory, Role
-from utils import create_tokens, is_valid_email, is_correct_password
+from utils import create_tokens, is_valid_email, is_correct_password, put_rftoken_db
 
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -37,6 +37,8 @@ def login():
             "userIP": user_ip
         }
         access_token, refresh_token = create_tokens(user.id, additional_claims)
+        # нужно сохранять рефреш токен в редис дальнейшую строку rftoken_to_redis (добавить функцию в utils)
+        put_rftoken_db(access_token, refresh_token)
         return jsonify(access_token=access_token, refresh_token=refresh_token)
     else:
         return (

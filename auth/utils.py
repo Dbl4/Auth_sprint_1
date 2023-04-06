@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from email_validator import validate_email, EmailNotValidError
 from flask import abort
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, decode_token
 
 
 def is_valid_email(email: str) -> str:
@@ -39,6 +39,13 @@ def create_tokens(identity: str, additional_claims: dict) -> tuple[str, str]:
     )
     refresh_token = uuid.uuid4()
     return access_token, refresh_token
+
+
+def put_rftoken_db(user_id: uuid, access_token: str, refresh_token: str) -> None:
+    decoded_token = decode_token(access_token)
+    jti = decoded_token["jti"]
+    rftoken_to_redis = f"{user_id}:{jti} {refresh_token}"
+    ## save redis rftoken_to_redis
 
 
 def is_correct_token():

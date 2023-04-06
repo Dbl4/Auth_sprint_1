@@ -3,6 +3,7 @@ from datetime import datetime
 from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.v1.api_forms import spec, SignupForm
@@ -44,6 +45,7 @@ def signup():
 @spec.validate(
     json=SignupForm,
 )
+@jwt_required()
 def change(user_id: uuid):
     # к методу надо прикладывать аксес токен: Bearer a5301be
     # после того как залогинились
