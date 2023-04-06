@@ -2,9 +2,9 @@ from spectree import SpecTree
 from pydantic import BaseModel
 
 
-class SignupForm(BaseModel):
+class AuthSignup(BaseModel):
     email: str
     password: str
 
 
-spec = SpecTree("flask")
+spectree = SpecTree("flask")

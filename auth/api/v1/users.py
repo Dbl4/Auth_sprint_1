@@ -5,7 +5,7 @@ from http import HTTPStatus
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 
-from api.v1.api_forms import spec, SignupForm
+from api.v1.api_models import spectree, AuthSignup
 from db import db
 from models import User
 from utils import hash_password, is_correct_password, is_valid_email
@@ -14,9 +14,7 @@ users = Blueprint("users", __name__, url_prefix="/users")
 
 
 @users.route("/signup/", methods=["POST"])
-@spec.validate(
-    json=SignupForm,
-)
+@spectree.validate(json=AuthSignup)
 def signup():
     email = is_valid_email(request.json.get("email"))
     password = hash_password(request.json.get("password"))
@@ -41,10 +39,8 @@ def signup():
 
 
 @users.route("/change/<uuid:user_id>/", methods=["PATCH"])
-@spec.validate(
-    json=SignupForm,
-)
-def change(user_id: uuid):
+@spectree.validate(json=AuthSignup)
+def change(user_id):
     # к методу надо прикладывать аксес токен: Bearer a5301be
     # после того как залогинились
     # нужно будет добавить, что изменять данные могут только текущий пользователь и админ
