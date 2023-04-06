@@ -1,6 +1,5 @@
 from spectree import SpecTree
-from pydantic import BaseModel
-from uuid import UUID
+from pydantic import BaseModel, validator
 
 
 class SignupForm(BaseModel):
@@ -11,5 +10,10 @@ class SignupForm(BaseModel):
 class RolesPost(BaseModel):
     name: str
 
+    @validator('name')
+    def name_min_length(cls, v):
+        if len(v) < 1:
+            raise ValueError('Название роли не может быть пустым')
+        return v
 
 spec = SpecTree("flask")
