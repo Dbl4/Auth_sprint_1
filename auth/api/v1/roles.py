@@ -1,9 +1,9 @@
-from flask import Blueprint, jsonify, abort, request
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from flask import Blueprint, jsonify, request
+from sqlalchemy.exc import IntegrityError
+from api.v1.api_models import spectree, RolesPost
 
 from db import db
-from models import User, Role
-from utils import hash_password, create_tokens
+from models import Role
 
 roles = Blueprint("roles", __name__, url_prefix="/roles")
 
@@ -17,22 +17,36 @@ def get():
 
 
 @roles.post("/")
+@spectree.validate(json=RolesPost)
 def post():
-    name = request.json.get("name")
-    role = Role(name=name)
+    role = Role(name=request.json.get("name"))
     db.session.add(role)
     try:
         db.session.commit()
     except IntegrityError:
-        abort(409, description="Role already exists")
-    return jsonify(name=name)
+        return "Роль уже существует", 409
+    return jsonify(role.to_json())
 
 
 @roles.put("/<uuid:role_id>/")
+@spectree.validate(json=RolesPost)
 def put(role_id):
-    return jsonify("put")
+    role = db.session.get(Role, role_id)
+    if not role:
+        return "Роль не найдена", 404
+    role.name = request.json.get("name")
+    try:
+        db.session.commit()
+    except IntegrityError:
+        return "Роль уже существует", 409
+    return "Роль переименована", 204
 
 
 @roles.delete("/<uuid:role_id>/")
 def delete(role_id):
-    return jsonify("delete")
+    role = db.session.get(Role, role_id)
+    if not role:
+        return "Роль не найдена", 404
+    db.session.delete(role)
+    db.session.commit()
+    return "Роль удалена", 204

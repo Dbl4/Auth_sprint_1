@@ -1,7 +1,4 @@
-from flask_jwt_extended import JWTManager
-
 from api import v1
-from db import init_db
 from flask import Flask
 from flask_jwt_extended import JWTManager
 
@@ -15,7 +12,7 @@ from commands import register_commands
 from db import db, migrate
 
 app = Flask(__name__)
-app.register_blueprint(v1)
+# app.register_blueprint(v1)
 
 def create_app(config):
     app = Flask(__name__)

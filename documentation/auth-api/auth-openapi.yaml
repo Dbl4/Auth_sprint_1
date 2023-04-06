@@ -4,6 +4,7 @@ info:
   version: 1.0.0
 servers :
   - url: http://localhost/api/v1
+  - url: http://localhost:5000
 paths:
   /users/:
     get:
@@ -500,6 +501,8 @@ paths:
           description: Требуется аутентификация
         '403':
           description: Действие разрешено администратору
+        '409':
+          description: Роль уже существует
 
   /roles/{role_id}/:
     put:
@@ -534,6 +537,8 @@ paths:
           description: Действие разрешено администратору
         '404':
           description: Роль не найдена
+        '409':
+          description: Роль уже существует
     delete:
       summary: Удаление роли
       description: Доступно администратору
