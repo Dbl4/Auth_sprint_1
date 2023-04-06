@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from api.v1.api_models import spec, RolesPost
+from api.v1.api_models import spectree, RolesPost
 
 from db import db
 from models import Role
@@ -17,23 +17,19 @@ def get():
 
 
 @roles.post("/")
-@spec.validate(json=RolesPost)
+@spectree.validate(json=RolesPost)
 def post():
+    role = Role(name=request.json.get("name"))
+    db.session.add(role)
     try:
-        name = request.json.get("name")
-        role = Role(name=name)
-        db.session.add(role)
-        try:
-            db.session.commit()
-        except IntegrityError:
-            return "Роль уже существует", 409
-        return jsonify(role.to_json())
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        db.session.commit()
+    except IntegrityError:
+        return "Роль уже существует", 409
+    return jsonify(role.to_json())
 
 
 @roles.put("/<uuid:role_id>/")
-@spec.validate(json=RolesPost)
+@spectree.validate(json=RolesPost)
 def put(role_id):
     role = db.session.get(Role, role_id)
     if not role:
