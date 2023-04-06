@@ -12,7 +12,6 @@ from commands import register_commands
 from db import db, migrate
 
 app = Flask(__name__)
-# app.register_blueprint(v1)
 
 def create_app(config):
     app = Flask(__name__)
@@ -31,16 +30,17 @@ def create_app(config):
 
     return app
 
-config = {}
-config["SQLALCHEMY_DATABASE_URI"] = URL.create(
-    drivername="postgresql",
-    username=settings.auth_postgres_user,
-    password=settings.auth_postgres_password,
-    host=settings.auth_postgres_host,
-    port=settings.auth_postgres_port,
-    database=settings.auth_postgres_db
-)
-config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+config = {
+    "SQLALCHEMY_DATABASE_URI": URL.create(
+        drivername="postgresql",
+        username=settings.auth_postgres_user,
+        password=settings.auth_postgres_password,
+        host=settings.auth_postgres_host,
+        port=settings.auth_postgres_port,
+        database=settings.auth_postgres_db
+    ),
+    "JWT_SECRET_KEY": settings.jwt_secret_key,
+}
 app = create_app(config)
 
 

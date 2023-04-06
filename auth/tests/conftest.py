@@ -8,9 +8,9 @@ from flask_migrate import downgrade as flask_migrate_downgrade
 
 
 TEST_CONFIG = {
-    'TESTING': True,
-    'DEBUG': True,
-    'SQLALCHEMY_DATABASE_URI': URL.create(
+    "TESTING": True,
+    "DEBUG": True,
+    "SQLALCHEMY_DATABASE_URI": URL.create(
         drivername="postgresql",
         username=settings.auth_postgres_user,
         password=settings.auth_postgres_password,
@@ -23,7 +23,7 @@ TEST_CONFIG = {
 
 @pytest.fixture(scope="session")
 def app():    
-    app = create_app(config=TEST_CONFIG)    
+    app = create_app(TEST_CONFIG)
     with app.app_context():
         yield app
 
