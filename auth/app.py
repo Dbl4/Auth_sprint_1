@@ -1,10 +1,6 @@
-from api import v1
 from flask import Flask
-from flask_jwt_extended import JWTManager
 
-from api import v1
-
-from settings import settings, auth_postgres_url
+from settings import settings
 from sqlalchemy.engine import URL
 from flask_cors import CORS
 
@@ -23,8 +19,10 @@ def create_app(config):
     from models import User, Role
     db.init_app(app)
     migrate.init_app(app, db)
+    from api.v1.auth import auth
     from api.v1.users import users
     from api.v1.roles import roles
+    app.register_blueprint(auth)
     app.register_blueprint(users)
     app.register_blueprint(roles)
 
