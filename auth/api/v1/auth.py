@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from db import db
 from models import User, AuthHistory, Role
-from utils import create_tokens, is_valid_email, is_correct_password
+from utils import create_tokens, is_valid_email, is_correct_password, put_rftoken_db
 
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -28,20 +28,20 @@ def login():
                 HTTPStatus.BAD_REQUEST,
             )
         roles = db.session.query(Role).join(User.roles).filter(User.id == user.id).all()
+        role_names = [role.name for role in roles]
         additional_claims = {
             "email": email,
-            "roles": roles,
-            "user_agent": user_agent,
-            "user_ip": user_ip
+            "roles": role_names,
+            "admin": user.is_admin,
+            "userAgent": user_agent,
+            "userIP": user_ip
         }
         access_token, refresh_token = create_tokens(user.id, additional_claims)
+        # нужно сохранять рефреш токен в редис дальнейшую строку rftoken_to_redis (добавить функцию в utils)
+        put_rftoken_db(user.id, access_token, refresh_token)
         return jsonify(access_token=access_token, refresh_token=refresh_token)
     else:
         return (
             jsonify(message="Login or password is incorrect"),
             HTTPStatus.BAD_REQUEST,
         )
-    
-
-def signup():
-    return jsonify(message="User is authorized.")

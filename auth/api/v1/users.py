@@ -2,7 +2,8 @@ import uuid
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import Blueprint, jsonify, abort, request
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.v1.api_models import spectree, AuthSignup
@@ -14,7 +15,9 @@ users = Blueprint("users", __name__, url_prefix="/users")
 
 
 @users.route("/signup/", methods=["POST"])
-@spectree.validate(json=AuthSignup)
+@spectree.validate(
+    json=AuthSignup,
+)
 def signup():
     email = is_valid_email(request.json.get("email"))
     password = hash_password(request.json.get("password"))
@@ -39,8 +42,11 @@ def signup():
 
 
 @users.route("/change/<uuid:user_id>/", methods=["PATCH"])
-@spectree.validate(json=AuthSignup)
-def change(user_id):
+@spectree.validate(
+    json=AuthSignup,
+)
+@jwt_required()
+def change(user_id: uuid):
     # к методу надо прикладывать аксес токен: Bearer a5301be
     # после того как залогинились
     # нужно будет добавить, что изменять данные могут только текущий пользователь и админ

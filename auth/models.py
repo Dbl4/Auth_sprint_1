@@ -4,7 +4,6 @@ from datetime import datetime
 from db import db
 from sqlalchemy.dialects.postgresql import UUID
 
-
 users_roles = db.Table(
     "users_roles",
     db.Column(
@@ -23,6 +22,7 @@ users_roles = db.Table(
     db.UniqueConstraint("user_id", "role_id"),
     schema="auth",
 )
+
 
 class User(db.Model):
     __tablename__ = "users"

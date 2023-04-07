@@ -14,20 +14,15 @@ class Settings(BaseSettings):
 
 settings = Settings(_env_file=".env", _env_file_encoding="utf-8")
 
-auth_postgres_url = URL.create(
-    drivername="postgresql",
-    username=settings.auth_postgres_user,
-    password=settings.auth_postgres_password,
-    host=settings.auth_postgres_host,
-    port=settings.auth_postgres_port,
-    database=settings.auth_postgres_db
-)
-
-auth_postgres_url_test = URL.create(
-    drivername="postgresql",
-    username=settings.auth_postgres_user,
-    password=settings.auth_postgres_password,
-    host=settings.auth_postgres_host,
-    port=settings.auth_postgres_port_test,
-    database=settings.auth_postgres_db
-)
+config = {
+    "SQLALCHEMY_DATABASE_URI": URL.create(
+        drivername="postgresql",
+        username=settings.auth_postgres_user,
+        password=settings.auth_postgres_password,
+        host=settings.auth_postgres_host,
+        port=settings.auth_postgres_port,
+        database=settings.auth_postgres_db
+    ),
+    "JWT_SECRET_KEY": settings.jwt_secret_key,
+    "JWT_ENCODE_NBF": False,
+}
