@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager
 
 from api import v1
 
-from settings import settings, config, auth_postgres_url
+from settings import settings, auth_postgres_url
 from sqlalchemy.engine import URL
 from flask_cors import CORS
 

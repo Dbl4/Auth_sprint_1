@@ -15,7 +15,7 @@ TEST_CONFIG = {
         username=settings.auth_postgres_user,
         password=settings.auth_postgres_password,
         host=settings.auth_postgres_host,
-        port=settings.auth_postgres_port,
+        port=settings.auth_postgres_port_test,
         database=settings.auth_postgres_db,
     ),
     "JWT_SECRET_KEY": settings.jwt_secret_key,
