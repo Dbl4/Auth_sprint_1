@@ -40,9 +40,9 @@ paths:
                       type: string
                       format: date-time
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено администратору
+          description: FORBIDDEN. Действие разрешено администратору
     post:
       summary: Регистрация нового пользователя
       description: |
@@ -84,7 +84,7 @@ paths:
                     format: email
                     example: email@example.com
         '409':
-          description: Пользователь с этим e-mail уже зарегистрирован
+          description: CONFLICT. Пользователь с этим e-mail уже зарегистрирован
 
   /users/{user_id}/:
     patch:
@@ -117,11 +117,11 @@ paths:
         '200':
           description: Успешное обновление данных
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено самому пользователю и администратору
+          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
         '404':
-          description: Пользователь не найден
+          description: NOT_FOUND. Пользователь не найден
     delete:
       summary: Удаление аккаунта пользователя
       description: Доступно самому пользователю и администратору.
@@ -138,13 +138,13 @@ paths:
         - bearerAuth: []
       responses:
         '204':
-          description: Аккаунт пользователя успешно удален
+          description: NO_CONTENT. Аккаунт пользователя успешно удален
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено самому пользователю и администратору
+          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
         '404':
-          description: Пользователь не найден
+          description: NOT_FOUND. Пользователь не найден
   
   /users/{user_id}/history/:
     get:
@@ -180,11 +180,11 @@ paths:
                         - 'login'
                         - 'logout'
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Неверный пароль         
+          description: FORBIDDEN. Действие разрешено самому пользователю и администратору       
         '404':
-          description: Пользователь не найден
+          description: NOT_FOUND. Пользователь не найден
   
   /users/{user_id}/roles/:
     get:
@@ -221,11 +221,11 @@ paths:
                         - premium
                         - admin
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено самому пользователю и администратору
+          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
         '404':
-          description: Пользователь не найден
+          description: NOT_FOUND. Пользователь не найден
     put:
       summary: Добавление пользователю роли
       description: Доступно администратору
@@ -267,11 +267,11 @@ paths:
                     name:
                       type: string
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено администратору
+          description: FORBIDDEN. Действие разрешено администратору
         '404':
-          description: Пользователь не найден
+          description: NOT_FOUND. Пользователь не найден
           
   /users/{user_id}/roles/{role_id}/:
     delete:
@@ -296,13 +296,13 @@ paths:
         - bearerAuth: []
       responses:
         '204':
-          description: Роль успешно удалена
+          description: NO_CONTENT. Роль успешно удалена
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено администратору
+          description: FORBIDDEN. Действие разрешено администратору
         '404':
-          description: Пользователь или роль не найдены
+          description: NOT_FOUND. Пользователь или роль не найдены
   
   
   /auth/login/:
@@ -347,7 +347,7 @@ paths:
                   refresh:
                     type: string
         '403':
-          description: Неверный пароль         
+          description: FORBIDDEN. Неверный пароль         
   
   
   /auth/check/:
@@ -364,11 +364,11 @@ paths:
         '200':
           description: JWT-токен валиден
         '401':
-          description: JWT-токен просрочен
+          description: UNAUTHORIZED. JWT-токен просрочен
         '403':
-          description: Подпись JWT-токена неверная
+          description: FORBIDDEN. Подпись JWT-токена неверная
         '404':
-          description: Пользователь не найден
+          description: NOT_FOUND. Пользователь не найден
 
 
   /auth/refresh/:
@@ -404,7 +404,7 @@ paths:
                   refresh:
                     type: string
         '403':
-          description: refresh токен не найден
+          description: FORBIDDEN. refresh токен не найден
   
   /auth/logout/:
     post:
@@ -419,9 +419,9 @@ paths:
         '200':
           description: Успешный выход
         '403':
-          description: Действие разрешено самому пользователю и администратору
+          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
         '404':
-          description: Пользователь не найден
+          description: NOT_FOUND. Пользователь не найден
   
   /auth/logout-all/:
     post:
@@ -436,9 +436,9 @@ paths:
         '200':
           description: Успешный выход
         '403':
-          description: Действие разрешено самому пользователю и администратору
+          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
         '404':
-          description: Пользователь не найден
+          description: NOT_FOUND. Пользователь не найден
           
   /roles/:
     get:
@@ -463,9 +463,9 @@ paths:
                     name:
                       type: string
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено администратору
+          description: FORBIDDEN. Действие разрешено администратору
     post:
       summary: Создание роли
       description: Доступно администратору
@@ -496,11 +496,11 @@ paths:
                   name:
                     type: string
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено администратору
+          description: FORBIDDEN. Действие разрешено администратору
         '409':
-          description: Роль уже существует
+          description: CONFLICT. Роль уже существует
 
   /roles/{role_id}/:
     put:
@@ -528,15 +528,15 @@ paths:
         - bearerAuth: []
       responses:
         '204':
-          description: Роль переименована
+          description: NO_CONTENT. Роль переименована
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено администратору
+          description: FORBIDDEN. Действие разрешено администратору
         '404':
-          description: Роль не найдена
+          description: NOT_FOUND. Роль не найдена
         '409':
-          description: Роль уже существует
+          description: CONFLICT. Роль уже существует
     delete:
       summary: Удаление роли
       description: Доступно администратору
@@ -553,13 +553,13 @@ paths:
         - bearerAuth: []
       responses:
         '204':
-          description: Роль удалена
+          description: NO_CONTENT. Роль удалена
         '401':
-          description: Требуется аутентификация
+          description: UNAUTHORIZED. Требуется аутентификация
         '403':
-          description: Действие разрешено администратору
+          description: FORBIDDEN. Действие разрешено администратору
         '404':
-          description: Роль не найдена
+          description: NOT_FOUND. Роль не найдена
 
 components:
   securitySchemes:

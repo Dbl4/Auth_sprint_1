@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
 from api.v1.api_models import spectree, RolesPost
@@ -24,7 +25,7 @@ def post():
     try:
         db.session.commit()
     except IntegrityError:
-        return "Роль уже существует", 409
+        return "Роль уже существует", HTTPStatus.CONFLICT
     return jsonify(role.to_json())
 
 
@@ -33,20 +34,20 @@ def post():
 def put(role_id):
     role = db.session.get(Role, role_id)
     if not role:
-        return "Роль не найдена", 404
+        return "Роль не найдена", HTTPStatus.NOT_FOUND
     role.name = request.json.get("name")
     try:
         db.session.commit()
     except IntegrityError:
-        return "Роль уже существует", 409
-    return "Роль переименована", 204
+        return "Роль уже существует", HTTPStatus.CONFLICT
+    return "Роль переименована", HTTPStatus.NO_CONTENT
 
 
 @roles.delete("/<uuid:role_id>/")
 def delete(role_id):
     role = db.session.get(Role, role_id)
     if not role:
-        return "Роль не найдена", 404
+        return "Роль не найдена", HTTPStatus.NOT_FOUND
     db.session.delete(role)
     db.session.commit()
-    return "Роль удалена", 204
+    return "Роль удалена", HTTPStatus.NO_CONTENT
