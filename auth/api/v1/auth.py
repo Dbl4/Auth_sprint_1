@@ -38,7 +38,7 @@ def login():
         }
         access_token, refresh_token = create_tokens(user.id, additional_claims)
         # нужно сохранять рефреш токен в редис дальнейшую строку rftoken_to_redis (добавить функцию в utils)
-        put_rftoken_db(access_token, refresh_token)
+        put_rftoken_db(user.id, access_token, refresh_token)
         return jsonify(access_token=access_token, refresh_token=refresh_token)
     else:
         return (
