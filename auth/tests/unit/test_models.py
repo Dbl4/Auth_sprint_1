@@ -1,10 +1,6 @@
-from flask import Flask
-from urllib.parse import urlunsplit
 import pytest
 
-from app import create_app
 from models import User, Role
-from db import db, migrate
 
 from sqlalchemy.exc import IntegrityError
 
