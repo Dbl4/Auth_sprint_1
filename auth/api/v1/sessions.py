@@ -2,15 +2,17 @@ from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 from db import db
 from models import User, AuthHistory, Role
-from utils import create_tokens, is_valid_email, is_correct_password, put_rftoken_db
+from tokens import create_tokens, is_valid_email, put_rftoken_db
+from password import is_correct_password
 
 sessions = Blueprint("sessions", __name__, url_prefix="/sessions")
 
 
-@sessions.route("/", methods=["POST"])
+@sessions.post("/")
 def login():
     email = is_valid_email(request.json.get("email"))
     password = request.json.get("password")
@@ -37,7 +39,7 @@ def login():
             "userIP": user_ip
         }
         access_token, refresh_token = create_tokens(user.id, additional_claims)
-        # нужно сохранять рефреш токен в редис дальнейшую строку rftoken_to_redis (добавить функцию в utils)
+        # нужно сохранять рефреш токен в редис дальнейшую строку rftoken_to_redis (добавить функцию в tokens)
         put_rftoken_db(user.id, access_token, refresh_token)
         return jsonify(access_token=access_token, refresh_token=refresh_token)
     else:
@@ -45,3 +47,16 @@ def login():
             jsonify(message="Login or password is incorrect"),
             HTTPStatus.BAD_REQUEST,
         )
+
+
+@sessions.get("/")
+@jwt_required()
+def check():
+    user = User.query.get(get_jwt_identity())
+    claims = get_jwt()
+    return jsonify({
+            "email": user.email,
+            "user-agent": claims["userAgent"],
+            "user-ip": claims["userIP"],
+            "roles": claims["roles"],
+        }), 200

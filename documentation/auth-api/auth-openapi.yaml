@@ -726,4 +726,4 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorMessage' 
           example:
-            - message: Missing Authorization Header
+            - message: Действие разрешено только администратору

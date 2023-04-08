@@ -1,4 +1,4 @@
-import uuid
+from uuid import uuid4, UUID
 from datetime import datetime
 from http import HTTPStatus
 
@@ -9,15 +9,14 @@ from sqlalchemy.exc import SQLAlchemyError
 from api.v1.api_models import spectree, AuthSignup
 from db import db
 from models import User
-from utils import hash_password, is_correct_password, is_valid_email
+from password import hash_password, is_correct_password
+from tokens import is_valid_email
 
 users = Blueprint("users", __name__, url_prefix="/users")
 
 
 @users.route("/signup/", methods=["POST"])
-@spectree.validate(
-    json=AuthSignup,
-)
+@spectree.validate(json=AuthSignup)
 def signup():
     email = is_valid_email(request.json.get("email"))
     password = hash_password(request.json.get("password"))
@@ -27,7 +26,7 @@ def signup():
             jsonify(message="User already registered"),
             HTTPStatus.BAD_REQUEST,
         )
-    id = uuid.uuid4()
+    id = uuid4()
     user = User(id=id, email=email, password=hash_password(password))
     db.session.add(user)
     try:
@@ -42,15 +41,10 @@ def signup():
 
 
 @users.route("/change/<uuid:user_id>/", methods=["PATCH"])
-@spectree.validate(
-    json=AuthSignup,
-)
+@spectree.validate(json=AuthSignup)
 @jwt_required()
-def change(user_id: uuid):
-    # к методу надо прикладывать аксес токен: Bearer a5301be
-    # после того как залогинились
-    # нужно будет добавить, что изменять данные могут только текущий пользователь и админ
-    email = is_valid_email(request.json.get("email"))
+def change(user_id: UUID):
+    email = is_valid_email(request.json("email"))
     update_password = request.json.get("password")
     user = User.query.get(user_id)
     if not user:
