@@ -7,10 +7,10 @@ from db import db
 from models import User, AuthHistory, Role
 from utils import create_tokens, is_valid_email, is_correct_password, put_rftoken_db
 
-auth = Blueprint("auth", __name__, url_prefix="/auth")
+sessions = Blueprint("sessions", __name__, url_prefix="/sessions")
 
 
-@auth.route("/login/", methods=["POST"])
+@sessions.route("/", methods=["POST"])
 def login():
     email = is_valid_email(request.json.get("email"))
     password = request.json.get("password")

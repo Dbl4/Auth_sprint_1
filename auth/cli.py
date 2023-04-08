@@ -14,7 +14,7 @@ def email_callback(ctx, param, value):
     return email
 
 
-def register_commands(app):
+def register_cli(app):
     @app.cli.command("create-superuser")
     @click.option("--email", prompt=True, callback=email_callback)
     @click.password_option()

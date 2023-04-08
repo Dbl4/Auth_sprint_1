@@ -1,15 +1,18 @@
 from http import HTTPStatus
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from api.v1.api_models import spectree, RolesPost
 
 from db import db
 from models import Role
+from tokens import admin_required
 
 roles = Blueprint("roles", __name__, url_prefix="/roles")
 
 
 @roles.get("/")
+@admin_required()
 def get():
     roles = []
     for role in Role.query.all():
@@ -18,6 +21,7 @@ def get():
 
 
 @roles.post("/")
+@admin_required()
 @spectree.validate(json=RolesPost)
 def post():
     role = Role(name=request.json.get("name"))
@@ -30,6 +34,7 @@ def post():
 
 
 @roles.put("/<uuid:role_id>/")
+@admin_required()
 @spectree.validate(json=RolesPost)
 def put(role_id):
     role = db.session.get(Role, role_id)
@@ -44,6 +49,7 @@ def put(role_id):
 
 
 @roles.delete("/<uuid:role_id>/")
+@admin_required()
 def delete(role_id):
     role = db.session.get(Role, role_id)
     if not role:

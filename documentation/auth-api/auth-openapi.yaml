@@ -3,8 +3,7 @@ info:
   title: Auth API
   version: 1.0.0
 servers :
-  - url: http://localhost/api/v1
-  - url: http://localhost:5000/api/v1
+  - url: http://localhost:5000/v1
 paths:
 
 
@@ -44,9 +43,9 @@ paths:
                       type: string
                       format: date-time
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: "#/components/responses/JwtRequiredError"
         '403':
-          description: FORBIDDEN. Действие разрешено администратору
+          $ref: '#/components/responses/AdminRequiredError'
 
   /users/{user_id}/:
     get:
@@ -112,9 +111,9 @@ paths:
                             - 'login'
                             - 'logout'
         '401':
-          description: UNAUTHORIZED. JWT-токен не приложен или просрочен
+          $ref: "#/components/responses/JwtRequiredError"
         '403':
-          description: FORBIDDEN. Подпись JWT-токена неверная
+          $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Пользователь не найден
         
@@ -146,9 +145,9 @@ paths:
         '200':
           description: Успешное обновление данных
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: "#/components/responses/JwtRequiredError"
         '403':
-          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
+          $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Пользователь не найден
     delete:
@@ -168,51 +167,12 @@ paths:
         '204':
           description: NO_CONTENT. Аккаунт пользователя успешно удален
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: "#/components/responses/JwtRequiredError"
         '403':
-          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
+          $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Пользователь не найден
 
-  
-  /users/{user_id}/history/:
-    get:
-      summary: Получение истории входов пользователя
-      tags:
-        - users
-      parameters:
-        - in: path
-          required: true
-          name: user_id
-          schema:
-            type: string
-            format: uuid
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    date:
-                      type: string
-                      format: date-time
-                    action:
-                      type: string
-                      enum:
-                        - 'login'
-                        - 'logout'
-        '401':
-          description: UNAUTHORIZED. Требуется аутентификация
-        '403':
-          description: FORBIDDEN. Действие разрешено самому пользователю и администратору       
-        '404':
-          description: NOT_FOUND. Пользователь не найден
   
   /users/{user_id}/roles/:
     get:
@@ -248,9 +208,9 @@ paths:
                         - premium
                         - manager
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: "#/components/responses/JwtRequiredError"
         '403':
-          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
+          $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Пользователь не найден
     put:
@@ -293,9 +253,9 @@ paths:
                     name:
                       type: string
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: "#/components/responses/JwtRequiredError"
         '403':
-          description: FORBIDDEN. Действие разрешено администратору
+          $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Пользователь не найден
           
@@ -323,9 +283,9 @@ paths:
         '204':
           description: NO_CONTENT. Роль успешно снята
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: "#/components/responses/JwtRequiredError"
         '403':
-          description: FORBIDDEN. Действие разрешено администратору
+          $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Пользователь или роль не найдены
 
@@ -379,9 +339,7 @@ paths:
                             - premium
                             - manager
         '401':
-          description: UNAUTHORIZED. JWT-токен не приложен или просрочен
-        '403':
-          description: FORBIDDEN. Подпись JWT-токена неверная
+          $ref: "#/components/responses/JwtRequiredError"
         '404':
           description: NOT_FOUND. Пользователь не найден
 
@@ -441,10 +399,8 @@ paths:
       responses:
         '200':
           description: Успешный выход
-        '403':
-          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
-        '404':
-          description: NOT_FOUND. Пользователь не найден
+        '401':
+          $ref: "#/components/responses/JwtRequiredError"
 
     put:
       summary: Обновление access и refresh токенов
@@ -476,6 +432,8 @@ paths:
                     type: string
                   refresh:
                     type: string
+        '401':
+          $ref: "#/components/responses/JwtRequiredError"
         '403':
           description: FORBIDDEN. refresh токен не найден
     
@@ -490,10 +448,8 @@ paths:
       responses:
         '200':
           description: Успешный выход
-        '403':
-          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
-        '404':
-          description: NOT_FOUND. Пользователь не найден
+        '401':
+          $ref: '#/components/responses/JwtRequiredError'
           
   /roles/:
     # Интерфейс управления списком ролей. Доступен администратору.
@@ -518,9 +474,9 @@ paths:
                     name:
                       type: string
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: '#/components/responses/JwtRequiredError'
         '403':
-          description: FORBIDDEN. Действие разрешено администратору
+          $ref: '#/components/responses/AdminRequiredError'
 
     post:
       summary: Создание роли
@@ -551,9 +507,9 @@ paths:
                   name:
                     type: string
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: '#/components/responses/JwtRequiredError'
         '403':
-          description: FORBIDDEN. Действие разрешено администратору
+          $ref: '#/components/responses/AdminRequiredError'
         '409':
           description: CONFLICT. Роль уже существует
 
@@ -584,9 +540,9 @@ paths:
         '204':
           description: NO_CONTENT. Роль переименована
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: '#/components/responses/JwtRequiredError'
         '403':
-          description: FORBIDDEN. Действие разрешено администратору
+          $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Роль не найдена
         '409':
@@ -609,16 +565,16 @@ paths:
         '204':
           description: NO_CONTENT. Роль удалена
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
+          $ref: '#/components/responses/JwtRequiredError'
         '403':
-          description: FORBIDDEN. Действие разрешено администратору
+          $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Роль не найдена
 
   /account/:
     # Интерфейс управления своим аккаунтом для пользователя
     get:
-      summary: Получиение информации об истории входов и прочее
+      summary: Получение информации об истории входов и прочее
       tags:
         - account
       security:
@@ -658,14 +614,8 @@ paths:
                             - 'login'
                             - 'logout'
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
-        '403':
-          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
-        '404':
-          description: NOT_FOUND. Пользователь не найден
+          $ref: '#/components/responses/JwtRequiredError'
 
-
-        
     post:
       summary: Регистрация нового пользователя
       description: В базе данных создается запись о новом пользователе.
@@ -729,11 +679,7 @@ paths:
         '200':
           description: Успешное обновление данных
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
-        '403':
-          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
-        '404':
-          description: NOT_FOUND. Пользователь не найден
+          $ref: '#/components/responses/JwtRequiredError'
 
     delete:
       summary: Удаление аккаунта пользователя
@@ -745,11 +691,7 @@ paths:
         '204':
           description: NO_CONTENT. Аккаунт пользователя успешно удален
         '401':
-          description: UNAUTHORIZED. Требуется аутентификация
-        '403':
-          description: FORBIDDEN. Действие разрешено самому пользователю и администратору
-        '404':
-          description: NOT_FOUND. Пользователь не найден
+          $ref: '#/components/responses/JwtRequiredError'
 
 
 components:
@@ -758,3 +700,30 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+  schemas:
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Missing Authorization Header
+
+  responses:
+    JwtRequiredError:
+      description: UNAUTHORIZED. Требуется аутентификация
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage' 
+          example:
+            - message: Missing Authorization Header
+
+    AdminRequiredError:
+      description: FORBIDDEN. Действие разрешено только администратору
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage' 
+          example:
+            - message: Missing Authorization Header

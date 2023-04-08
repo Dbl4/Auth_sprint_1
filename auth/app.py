@@ -1,21 +1,21 @@
 from flask import Flask
-from flask_jwt_extended import JWTManager
 
 from api import v1
 from flask_cors import CORS
 
-from commands import register_commands
+from cli import register_cli
 from settings import config
 from db import db, migrate
+from tokens import register_tokens
 
 
 def create_app(config):
     app = Flask(__name__)
     CORS(app)
     app.config.update(**config)
-    jwt = JWTManager(app)
 
-    register_commands(app)
+    register_cli(app)
+    register_tokens(app)
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -25,11 +25,6 @@ def create_app(config):
 
 
 app = create_app(config)
-
-
-@app.route("/hello")
-def hello_world():
-    return "Hello, World!"
 
 
 def main():
