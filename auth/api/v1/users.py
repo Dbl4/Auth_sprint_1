@@ -63,20 +63,14 @@ def change(user_id: UUID):
             HTTPStatus.NOT_FOUND,
         )
 
-    if update_email and user.email == update_email:
+    if update_email and user.email == update_email and \
+            update_password and is_correct_password(user.password, update_password):
         return (
-            jsonify(message="Emails match"),
+            jsonify(message="Emails and password match"),
             HTTPStatus.BAD_REQUEST,
         )
     else:
         user.email = is_valid_email(update_email)
-
-    if update_password and is_correct_password(user.password, update_password):
-        return (
-            jsonify(message="Passwords match"),
-            HTTPStatus.BAD_REQUEST,
-        )
-    else:
         user.password = hash_password(update_password)
 
     user.modified = datetime.utcnow()
@@ -132,32 +126,19 @@ def get_user_roles(user_id: UUID):
     return jsonify(roles=roles), HTTPStatus.OK
 
 
-@users.get("/<uuid:user_id>/roles")
-@admin_required()
-def get_user_roles(user_id: UUID):
-    user = User.query.get(user_id)
-    if not user:
-        return (
-            jsonify(message="User does not exists"),
-            HTTPStatus.NOT_FOUND,
-        )
-    roles = [{"id": role.id, "name": role.name} for role in user.roles]
-
-    return jsonify(roles=roles), HTTPStatus.OK
-
-
 @users.put("/<uuid:user_id>/roles")
 @admin_required()
 @spectree.validate(json=RolesPost)
 def put_user_roles(user_id: UUID):
-    # доделать
-    # если в RolesPost добавлю id ничего не сломается?
-    assignment_role = request.json.get("name")
+    assignment_role_id = request.json.get("role_id")
     user = User.query.get(user_id)
-    role = Role.query.get(assignment_role)
+    new_role = Role.query.get(assignment_role_id)
 
-    if not role:
-        return "Роль не найдена", HTTPStatus.NOT_FOUND
+    if not new_role:
+        return (
+            jsonify(message="Role does not exists"),
+            HTTPStatus.NOT_FOUND,
+        )
 
     if not user:
         return (
@@ -165,4 +146,61 @@ def put_user_roles(user_id: UUID):
             HTTPStatus.NOT_FOUND,
         )
 
-    return jsonify(id=role.id, name=role.name), HTTPStatus.OK
+    role_exists = any(role.id == new_role.id for role in user.roles)
+    if role_exists:
+        return (
+            jsonify(message="User already has a role"),
+            HTTPStatus.CONFLICT,
+        )
+
+    user.roles.append(new_role)
+    try:
+        sql.session.commit()
+    except SQLAlchemyError as e:
+        return jsonify(message=e), HTTPStatus.CONFLICT
+
+    return jsonify(
+        message="User is assigned a role",
+        id=assignment_role_id,
+        name=new_role.name
+    ), HTTPStatus.OK
+
+
+@users.delete("/<uuid:user_id>/roles")
+@admin_required()
+@spectree.validate(json=RolesPost)
+def delete_user_roles(user_id: UUID):
+    assignment_role_id = request.json.get("role_id")
+    user = User.query.get(user_id)
+    del_role = Role.query.get(assignment_role_id)
+
+    if not del_role:
+        return (
+            jsonify(message="Role does not exists"),
+            HTTPStatus.NOT_FOUND,
+        )
+
+    if not user:
+        return (
+            jsonify(message="User does not exists"),
+            HTTPStatus.NOT_FOUND,
+        )
+
+    role_exists = any(role.id == del_role.id for role in user.roles)
+    if not role_exists:
+        return (
+            jsonify(message="User does not have this role"),
+            HTTPStatus.CONFLICT,
+        )
+
+    user.roles.delete(del_role)
+    try:
+        sql.session.commit()
+    except SQLAlchemyError as e:
+        return jsonify(message=e), HTTPStatus.CONFLICT
+
+    return jsonify(
+        message="User removed from role",
+        id=assignment_role_id,
+        name=del_role.name
+    ), HTTPStatus.OK
