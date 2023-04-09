@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     auth_postgres_port_test: int = Field(5434, env="AUTH_POSTGRES_PORT_TEST")
     auth_postgres_db: str = Field("auth", env="AUTH_POSTGRES_DB")
     jwt_secret_key: str = Field(..., env="JWT_SECRET_KEY")
-    auth_admin_email: str = Field(..., env="AUTH_ADMIN_EMAIL")
-    auth_admin_password: str = Field(..., env="AUTH_ADMIN_PASSWORD")
+    test_user_email: str = Field(..., env="TEST_USER_EMAIL")
+    test_user_password: str = Field(..., env="TEST_USER_PASSWORD")
 
 
 settings = Settings(_env_file=".env", _env_file_encoding="utf-8")

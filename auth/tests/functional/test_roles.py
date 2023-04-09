@@ -1,4 +1,4 @@
-from tests.conftest import login_admin
+from tests.settings import login_user, create_user
 
 def test_create_role(test_client, session, faker):
     """
@@ -6,7 +6,8 @@ def test_create_role(test_client, session, faker):
     WHEN POST request is sent
     THEN HTTP code 200 is received, role exists in the list of roles
     """
-    access_token, refresh_token = login_admin(test_client)
+    create_user(session=session, admin=True)
+    access_token, refresh_token = login_user(test_client)
     name = faker.sentence(nb_words=3)
     response = test_client.post(
         "/v1/roles/",
@@ -28,7 +29,8 @@ def test_validation(test_client, session):
     WHEN A request without the name field is received
     THEN HTTP code 422 is returned
     """
-    access_token, refresh_token = login_admin(test_client)
+    create_user(session=session, admin=True)
+    access_token, refresh_token = login_user(test_client)
     response = test_client.post(
         "/v1/roles/",
         json={"not_valid": "actor"},
@@ -54,7 +56,8 @@ def test_rename_role(test_client, session, faker):
     WHEN PUT requiest is sent
     THEN HTTP code 204 is received
     """
-    access_token, refresh_token = login_admin(test_client)
+    create_user(session=session, admin=True)
+    access_token, refresh_token = login_user(test_client)
     name = faker.sentence(nb_words=3)
     response = test_client.post(
         "/v1/roles/",
@@ -85,7 +88,8 @@ def test_delete_role(test_client, session, faker):
     WHEN DELETE requiest is sent
     THEN HTTP code 204 is received
     """
-    access_token, refresh_token = login_admin(test_client)
+    create_user(session=session, admin=True)
+    access_token, refresh_token = login_user(test_client)
     name = faker.sentence(nb_words=3)
     response = test_client.post(
         "/v1/roles/",
