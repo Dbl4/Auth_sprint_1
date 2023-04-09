@@ -1,5 +1,5 @@
 import click
-from db import db
+from db import sql
 
 from models import User
 from password import hash_password
@@ -22,6 +22,6 @@ def register_cli(app):
         """Создать администратора пользователей"""
 
         admin = User(password=hash_password(password), email=email, is_admin=True)
-        db.session.add(admin)
-        db.session.commit()
+        sql.session.add(admin)
+        sql.session.commit()
         click.echo("Admin created")

@@ -2,7 +2,7 @@ import pytest
 from app import create_app
 from settings import settings
 from sqlalchemy.engine import URL
-from db import db as _db
+from db import sql
 from flask_migrate import upgrade as flask_migrate_upgrade
 from flask_migrate import downgrade as flask_migrate_downgrade
 from password import hash_password
@@ -21,6 +21,11 @@ TEST_CONFIG = {
         database=settings.auth_postgres_db,
     ),
     "JWT_SECRET_KEY": settings.jwt_secret_key,
+    "JWT_ENCODE_NBF": False,
+    "REDIS_HOST": settings.auth_redis_host,
+    "REDIS_PORT": settings.auth_redis_port,
+    "ACCESS_TOKEN_MINUTES": settings.auth_access_token_minutes,
+    "REFRESH_TOKEN_MINUTES": settings.auth_refresh_token_minutes,
 }
 
 
@@ -43,10 +48,10 @@ def db(app, request):
     def teardown():
         flask_migrate_downgrade(directory="migrations")
 
-    _db.app = app
+    sql.app = app
     flask_migrate_upgrade(directory="migrations")
     request.addfinalizer(teardown)
-    return _db
+    return sql
 
 
 @pytest.fixture(scope="function")

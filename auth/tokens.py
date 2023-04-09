@@ -10,7 +10,8 @@ from functools import wraps
 from uuid import uuid4, UUID
 from datetime import timedelta
 from email_validator import validate_email, EmailNotValidError
-
+import db
+from settings import settings
 
 def is_valid_email(email: str) -> str:
     try:
@@ -24,17 +25,43 @@ def create_tokens(identity: str, additional_claims: dict) -> tuple[str, str]:
     access_token = create_access_token(
         identity=identity,
         additional_claims=additional_claims,
-        expires_delta=timedelta(minutes=5),
+        expires_delta=timedelta(minutes=settings.auth_access_token_minutes),
     )
     refresh_token = uuid4()
     return str(access_token), str(refresh_token)
 
 
-def put_rftoken_db(user_id: UUID, access_token: str, refresh_token: str) -> None:
-    decoded_token = decode_token(access_token)
-    jti = decoded_token["jti"]
-    rftoken_to_redis = f"{user_id}:{jti} {refresh_token}"
-    ## save redis rftoken_to_redis
+def put_token(user_id: UUID, access_token: str, refresh_token: str) -> None:
+    """
+    Puts refresh token into Redis.
+    """
+    ACCESS_EXPIRES = timedelta(minutes=settings.auth_refresh_token_minutes)
+    db.redis.set(
+        str(user_id) + ":" + str(decode_token(access_token)["jti"]),
+        refresh_token,
+        ex=ACCESS_EXPIRES,
+    )
+
+
+def get_token(user_id: UUID, access_token: str) -> None:
+    """
+    Gets refresh token by jti from Redis.
+    """
+    return db.redis.get(
+        str(user_id) + ":" + str(decode_token(access_token)["jti"])
+    )
+
+
+def get_all_tokens(user_id: UUID, access_token: str, refresh_token: str) -> None:
+    """
+    Gets all refresh tokens for a user from Redis.
+    """
+
+
+def delete_all_tokens(user_id: UUID) -> None:
+    """
+    Deletes all refresh tokens for a user from Redis.
+    """
 
 
 def is_correct_token():

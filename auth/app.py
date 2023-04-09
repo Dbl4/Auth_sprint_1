@@ -2,10 +2,11 @@ from flask import Flask
 
 from api import v1
 from flask_cors import CORS
+from redis import StrictRedis
 
 from cli import register_cli
 from settings import config
-from db import db, migrate
+import db
 from tokens import register_tokens
 
 
@@ -17,9 +18,15 @@ def create_app(config):
     register_cli(app)
     register_tokens(app)
 
-    db.init_app(app)
-    migrate.init_app(app, db)
+    db.sql.init_app(app)
+    db.migrate.init_app(app, db.sql)
     app.register_blueprint(v1)
+
+    db.redis = StrictRedis(
+        host=config["REDIS_HOST"],
+        port=config["REDIS_PORT"],
+        decode_responses=True,
+    )
 
     return app
 

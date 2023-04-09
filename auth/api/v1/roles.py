@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
 from api.v1.api_models import spectree, RolesPost
 
-from db import db
+from db import sql
 from models import Role
 from tokens import admin_required
 
@@ -24,9 +24,9 @@ def get():
 @spectree.validate(json=RolesPost)
 def post():
     role = Role(name=request.json.get("name"))
-    db.session.add(role)
+    sql.session.add(role)
     try:
-        db.session.commit()
+        sql.session.commit()
     except IntegrityError:
         return "Роль уже существует", HTTPStatus.CONFLICT
     return jsonify(role.to_json())
@@ -36,12 +36,12 @@ def post():
 @admin_required()
 @spectree.validate(json=RolesPost)
 def put(role_id):
-    role = db.session.get(Role, role_id)
+    role = sql.session.get(Role, role_id)
     if not role:
         return "Роль не найдена", HTTPStatus.NOT_FOUND
     role.name = request.json.get("name")
     try:
-        db.session.commit()
+        sql.session.commit()
     except IntegrityError:
         return "Роль уже существует", HTTPStatus.CONFLICT
     return "Роль переименована", HTTPStatus.NO_CONTENT
@@ -50,9 +50,9 @@ def put(role_id):
 @roles.delete("/<uuid:role_id>/")
 @admin_required()
 def delete(role_id):
-    role = db.session.get(Role, role_id)
+    role = sql.session.get(Role, role_id)
     if not role:
         return "Роль не найдена", HTTPStatus.NOT_FOUND
-    db.session.delete(role)
-    db.session.commit()
+    sql.session.delete(role)
+    sql.session.commit()
     return "Роль удалена", HTTPStatus.NO_CONTENT

@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.v1.api_models import spectree, AuthSignup
-from db import db
+from db import sql
 from models import User
 from password import hash_password, is_correct_password
 from tokens import is_valid_email
@@ -28,9 +28,9 @@ def signup():
         )
     id = uuid4()
     user = User(id=id, email=email, password=hash_password(password))
-    db.session.add(user)
+    sql.session.add(user)
     try:
-        db.session.commit()
+        sql.session.commit()
     except SQLAlchemyError as err:
         return (
             jsonify(message=err),
@@ -60,7 +60,7 @@ def change(user_id: UUID):
     try:
         user.password = hash_password(update_password)
         user.modified = datetime.utcnow()
-        db.session.commit()
+        sql.session.commit()
     except SQLAlchemyError as err:
         return (
             jsonify(message=err),
