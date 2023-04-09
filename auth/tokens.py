@@ -52,18 +52,22 @@ def get_token(user_id: UUID, access_token: str) -> str:
     )
 
 
-def get_all_tokens(user_id: UUID) -> list[str]:
+def count_tokens(user_id: UUID) -> int:
     """
-    Gets all refresh tokens for a user from Redis.
+    Gets number of refresh tokens for given user from Redis.
     """
-    # https://redis.readthedocs.io/en/stable/commands.html#redis.commands.core.CoreCommands.scan
-    return []
+    count = 0
+    for key in db.redis.scan_iter(f"{user_id}:*"):
+        count += 1
+    return count
 
 
 def delete_all_tokens(user_id: UUID) -> None:
     """
-    Deletes all refresh tokens for a user from Redis.
+    Deletes all refresh tokens for given user from Redis.
     """
+    for key in db.redis.scan_iter(f"{user_id}:*"):
+        db.redis.delete(key)
 
 
 def is_correct_token():
