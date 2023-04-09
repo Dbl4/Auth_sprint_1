@@ -43,7 +43,7 @@ def put_token(user_id: UUID, access_token: str, refresh_token: str) -> None:
     )
 
 
-def get_token(user_id: UUID, access_token: str) -> None:
+def get_token(user_id: UUID, access_token: str) -> str:
     """
     Gets refresh token by jti from Redis.
     """
@@ -52,10 +52,12 @@ def get_token(user_id: UUID, access_token: str) -> None:
     )
 
 
-def get_all_tokens(user_id: UUID, access_token: str, refresh_token: str) -> None:
+def get_all_tokens(user_id: UUID) -> list[str]:
     """
     Gets all refresh tokens for a user from Redis.
     """
+    # https://redis.readthedocs.io/en/stable/commands.html#redis.commands.core.CoreCommands.scan
+    return []
 
 
 def delete_all_tokens(user_id: UUID) -> None:
