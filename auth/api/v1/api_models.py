@@ -2,7 +2,7 @@ from spectree import SpecTree
 from pydantic import BaseModel, validator
 
 
-class AuthSignup(BaseModel):
+class Signup(BaseModel):
     email: str
     password: str
 

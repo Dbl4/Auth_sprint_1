@@ -38,4 +38,4 @@ loaddata:
 
 
 authadmin:
-	docker-compose exec auth flask create-superuser
+	docker-compose exec auth flask create-admin
