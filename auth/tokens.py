@@ -35,11 +35,10 @@ def put_token(user_id: UUID, access_token: str, refresh_token: str) -> None:
     """
     Puts refresh token into Redis.
     """
-    ACCESS_EXPIRES = timedelta(minutes=settings.auth_refresh_token_minutes)
     db.redis.set(
         str(user_id) + ":" + str(decode_token(access_token)["jti"]),
         refresh_token,
-        ex=ACCESS_EXPIRES,
+        ex=timedelta(minutes=settings.auth_refresh_token_minutes),
     )
 
 
