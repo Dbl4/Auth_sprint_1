@@ -114,12 +114,10 @@ def test_delete_role(test_client, session, faker):
 
 def test_unauthorized_permissions(test_client, session):
     """
-    GIVEN Non-admin user exists
+    GIVEN User is not logged in
     WHEN User makes any request to any endpoint under /roles/
     THEN HTTP code 401 is returned
     """
-    create_user(session=session, admin=False)
-    access_token, refresh_token = login_user(test_client)
     response = test_client.get("/v1/roles/")
     assert response.status_code == 401
     response = test_client.post("/v1/roles/")

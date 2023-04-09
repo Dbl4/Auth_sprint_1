@@ -37,3 +37,14 @@ def test_check(test_client, session, faker):
         headers={"Authorization": "Bearer {}".format(access_token)},
     )
     assert response.status_code == 200
+
+
+def test_unauthorized_permissions(test_client, session):
+    """
+    GIVEN User is not logged in
+    WHEN User makes any request to any endpoint under /sessions/,
+      except POST /sessions/
+    THEN HTTP code 401 is returned
+    """
+    response = test_client.get("/v1/sessions/")
+    assert response.status_code == 401
