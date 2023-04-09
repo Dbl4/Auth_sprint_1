@@ -45,7 +45,7 @@ def put_token(user_id: UUID, access_token: str, refresh_token: str) -> None:
 
 def get_token(user_id: UUID, access_token: str) -> str:
     """
-    Gets refresh token by jti from Redis.
+    Gets refresh token for given access token from Redis.
     """
     return db.redis.get(
         str(user_id) + ":" + str(decode_token(access_token)["jti"])
