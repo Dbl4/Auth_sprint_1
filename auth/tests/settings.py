@@ -14,6 +14,8 @@ def create_user(session, admin=False):
         )
     )
     session.commit()
+    user = User.query.filter_by(email=settings.test_user_email).first()
+    return user.id
 
 
 def login_user(test_client):
