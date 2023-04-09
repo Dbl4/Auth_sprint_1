@@ -1,46 +1,46 @@
 import uuid
 from datetime import datetime
 
-from db import db
+from db import sql
 from sqlalchemy.dialects.postgresql import UUID
 
-users_roles = db.Table(
+users_roles = sql.Table(
     "users_roles",
-    db.Column(
+    sql.Column(
         "user_id",
-        db.ForeignKey("auth.users.id"),
+        sql.ForeignKey("auth.users.id"),
         primary_key=True,
         nullable=False,
     ),
-    db.Column(
+    sql.Column(
         "role_id",
-        db.ForeignKey("auth.roles.id"),
+        sql.ForeignKey("auth.roles.id"),
         primary_key=True,
         nullable=False,
     ),
-    db.Column("created", db.DateTime, default=datetime.utcnow, nullable=False),
-    db.UniqueConstraint("user_id", "role_id"),
+    sql.Column("created", sql.DateTime, default=datetime.utcnow, nullable=False),
+    sql.UniqueConstraint("user_id", "role_id"),
     schema="auth",
 )
 
 
-class User(db.Model):
+class User(sql.Model):
     __tablename__ = "users"
     __table_args__ = {"schema": "auth"}
 
-    id = db.Column(
+    id = sql.Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
         unique=True,
         nullable=False,
     )
-    email = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    is_admin = db.Column(db.Boolean, nullable=False, default=False)
-    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    modified = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    roles = db.relationship(
+    email = sql.Column(sql.String, unique=True, nullable=False)
+    password = sql.Column(sql.String, nullable=False)
+    is_admin = sql.Column(sql.Boolean, nullable=False, default=False)
+    created = sql.Column(sql.DateTime, default=datetime.utcnow, nullable=False)
+    modified = sql.Column(sql.DateTime, default=datetime.utcnow, nullable=False)
+    roles = sql.relationship(
         "Role",
         secondary=users_roles,
         back_populates="users",
@@ -50,26 +50,26 @@ class User(db.Model):
         return f"<User {self.email}>"
 
 
-class Role(db.Model):
+class Role(sql.Model):
     __tablename__ = "roles"
     __table_args__ = {"schema": "auth"}
 
-    id = db.Column(
+    id = sql.Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
         unique=True,
         nullable=False,
     )
-    name = db.Column(db.String, unique=True, nullable=False)
-    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    modified = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    users = db.relationship(
+    name = sql.Column(sql.String, unique=True, nullable=False)
+    created = sql.Column(sql.DateTime, default=datetime.utcnow, nullable=False)
+    modified = sql.Column(sql.DateTime, default=datetime.utcnow, nullable=False)
+    users = sql.relationship(
         "User",
         secondary=users_roles,
         back_populates="roles",
     )
-    db.UniqueConstraint("name"),
+    sql.UniqueConstraint("name"),
 
     def __repr__(self):
         return f"<Role {self.name}>"
@@ -78,22 +78,22 @@ class Role(db.Model):
         return {"id": self.id, "name": self.name}
 
 
-class AuthHistory(db.Model):
+class AuthHistory(sql.Model):
     __tablename__ = "auth_history"
     __table_args__ = {"schema": "auth"}
 
-    id = db.Column(
+    id = sql.Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
     )
-    user_id = db.Column(
+    user_id = sql.Column(
         UUID(as_uuid=True),
-        db.ForeignKey("auth.users.id", ondelete="CASCADE"),
+        sql.ForeignKey("auth.users.id", ondelete="CASCADE"),
         nullable=False,
     )
-    user_agent = db.Column(db.String, nullable=False)
-    user_ip = db.Column(db.String, nullable=False)
-    action = db.Column(db.String, nullable=True)
-    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    user_agent = sql.Column(sql.String, nullable=False)
+    user_ip = sql.Column(sql.String, nullable=False)
+    action = sql.Column(sql.String, nullable=True)
+    created = sql.Column(sql.DateTime, default=datetime.utcnow, nullable=False)
