@@ -10,7 +10,7 @@ def create_user(session, admin=False):
         User(
             password=hash_password(settings.test_user_password),
             email=settings.test_user_email,
-            is_admin=True,
+            is_admin=admin,
         )
     )
     session.commit()

@@ -59,16 +59,16 @@ def admin_required():
     """
     Decorator function for endpoints that allow only admins.
     """
-
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
             verify_jwt_in_request()
             claims = get_jwt()
+            print(claims)
             if claims["admin"] == True:
                 return fn(*args, **kwargs)
             else:
-                return jsonify(message="Admins only!"), 403
+                return jsonify(message="Действие разрешено только администратору"), 403
 
         return decorator
 

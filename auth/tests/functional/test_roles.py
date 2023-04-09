@@ -1,3 +1,4 @@
+from uuid import uuid4
 from tests.settings import login_user, create_user
 
 def test_create_role(test_client, session, faker):
@@ -109,3 +110,44 @@ def test_delete_role(test_client, session, faker):
         headers={"Authorization": "Bearer {}".format(access_token)},
     )
     assert response.json == []
+
+
+def test_unauthorized_permissions(test_client, session):
+    """
+    GIVEN Non-admin user exists
+    WHEN User makes any request to any endpoint under /roles/
+    THEN HTTP code 401 is returned
+    """
+    create_user(session=session, admin=False)
+    access_token, refresh_token = login_user(test_client)
+    response = test_client.get("/v1/roles/")
+    assert response.status_code == 401
+    response = test_client.post("/v1/roles/")
+    assert response.status_code == 401
+    response = test_client.put(f"/v1/roles/{uuid4()}/")
+    assert response.status_code == 401
+    response = test_client.delete(f"/v1/roles/{uuid4()}/")
+    assert response.status_code == 401
+
+
+def test_user_permissions(test_client, session):
+    create_user(session=session, admin=False)
+    access_token, refresh_token = login_user(test_client)
+    response = test_client.get(
+        "/v1/roles/",
+        headers={"Authorization": "Bearer {}".format(access_token)},
+    )
+    response = test_client.post(
+        "/v1/roles/",
+        headers={"Authorization": "Bearer {}".format(access_token)},
+    )
+    response = test_client.put(
+        f"/v1/roles/{uuid4()}/",
+        headers={"Authorization": "Bearer {}".format(access_token)},
+    )
+    response = test_client.delete(
+        f"/v1/roles/{uuid4()}/",
+        headers={"Authorization": "Bearer {}".format(access_token)},
+    )
+    print(response.json)
+    assert response.status_code == 403
