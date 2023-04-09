@@ -13,12 +13,12 @@ from email_validator import validate_email, EmailNotValidError
 import db
 from settings import settings
 
+
 def is_valid_email(email: str) -> str:
     try:
         return validate_email(email).email
     except EmailNotValidError as err:
         abort(422, description="Email is not valid.")
-
 
 
 def create_tokens(identity: str, additional_claims: dict) -> tuple[str, str]:
@@ -69,6 +69,16 @@ def delete_all_tokens(user_id: UUID) -> None:
         db.redis.delete(key)
 
 
+def delete_token(user_id: UUID, access_token: str, refresh_token: str) -> None:
+    """
+    Deletes refresh token for given user from Redis.
+    """
+    db.redis.delete(
+        str(user_id) + ":" + str(decode_token(access_token)["jti"]),
+        refresh_token,
+    )
+
+
 def is_correct_token():
     # в базе будут храниться токены, будем проверять,
     # есть ли приходящий рефреш токен в базе.
@@ -91,6 +101,7 @@ def admin_required():
     """
     Decorator function for endpoints that allow only admins.
     """
+
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):

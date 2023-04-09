@@ -27,7 +27,7 @@ def signup():
             HTTPStatus.BAD_REQUEST,
         )
     id = uuid4()
-    user = User(id=id, email=email, password=hash_password(password))
+    user = User(id=id, email=email, password=password)
     sql.session.add(user)
     try:
         sql.session.commit()

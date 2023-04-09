@@ -6,12 +6,12 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
     get_jwt,
-    decode_token,
+    decode_token, get_jwt_header,
 )
 
 import db
 from models import User, AuthHistory, Role
-from tokens import create_tokens, is_valid_email, put_token
+from tokens import create_tokens, is_valid_email, put_token, delete_token, get_token, delete_all_tokens
 from password import is_correct_password
 
 sessions = Blueprint("sessions", __name__, url_prefix="/sessions")
@@ -71,5 +71,43 @@ def check():
                 "roles": claims["roles"],
             }
         ),
-        200,
+        HTTPStatus.OK,
+    )
+
+
+@sessions.delete("/")
+@jwt_required()
+def logout():
+    user = User.query.get(get_jwt_identity())
+    auth_header = request.headers.get('Authorization')
+    access_token = auth_header.split(" ")[1]
+    refresh_token = get_token(user.id, access_token)
+    delete_token(user.id, access_token, refresh_token)
+    return (
+        jsonify(message="Successful logout"),
+        HTTPStatus.OK,
+    )
+
+
+@sessions.delete("/all/")
+@jwt_required()
+def logout_all():
+    user = User.query.get(get_jwt_identity())
+    delete_all_tokens(user.id)
+    return (
+        jsonify(message="Successful logout from all devices"),
+        HTTPStatus.OK,
+    )
+
+
+@sessions.put("/")
+def refresh():
+    user = User.query.get(get_jwt_identity())
+    auth_header = request.headers.get('Authorization')
+    access_token = auth_header.split(" ")[1]
+    refresh_token = get_token(user.id, access_token)
+    delete_token(user.id, access_token, refresh_token)
+    return (
+        jsonify(message="Successful logout"),
+        HTTPStatus.OK,
     )

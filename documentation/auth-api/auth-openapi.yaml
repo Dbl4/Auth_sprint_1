@@ -404,6 +404,9 @@ paths:
 
     put:
       summary: Обновление access и refresh токенов
+      description: Обновляет access и refresh токены. 
+        Срок жизни refresh отодвигается, если пользователь пользуется сервисом.
+        А если не заходил n дней, то тогда пользователь заново проходит авторизацию.
       tags:
         - sessions
       requestBody:
