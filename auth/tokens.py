@@ -42,12 +42,13 @@ def put_token(user_id: UUID, access_token: str, refresh_token: str) -> None:
     )
 
 
-def get_token(user_id: UUID, access_token: str) -> str:
+def get_token(access_token: str) -> str:
     """
     Gets refresh token for given access token from Redis.
     """
+    payload = decode_token(access_token)
     return db.redis.get(
-        str(user_id) + ":" + str(decode_token(access_token)["jti"])
+        str(payload["sub"]) + ":" + str(payload["jti"])
     )
 
 
@@ -69,14 +70,12 @@ def delete_all_tokens(user_id: UUID) -> None:
         db.redis.delete(key)
 
 
-def delete_token(user_id: UUID, access_token: str, refresh_token: str) -> None:
+def delete_token(access_token: str) -> None:
     """
     Deletes refresh token for given user from Redis.
     """
-    db.redis.delete(
-        str(user_id) + ":" + str(decode_token(access_token)["jti"]),
-        refresh_token,
-    )
+    payload = decode_token(access_token)
+    db.redis.delete(str(payload["sub"]) + ":" + str(payload["jti"]))
 
 
 def is_correct_token():

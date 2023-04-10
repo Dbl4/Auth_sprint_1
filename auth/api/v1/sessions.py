@@ -81,8 +81,8 @@ def logout():
     user = User.query.get(get_jwt_identity())
     auth_header = request.headers.get('Authorization')
     access_token = auth_header.split(" ")[1]
-    refresh_token = get_token(user.id, access_token)
-    delete_token(user.id, access_token, refresh_token)
+    refresh_token = get_token(access_token)
+    delete_token(access_token)
     return (
         jsonify(message="Successful logout"),
         HTTPStatus.OK,
@@ -105,8 +105,8 @@ def refresh():
     user = User.query.get(get_jwt_identity())
     auth_header = request.headers.get('Authorization')
     access_token = auth_header.split(" ")[1]
-    refresh_token = get_token(user.id, access_token)
-    delete_token(user.id, access_token, refresh_token)
+    refresh_token = get_token(access_token)
+    delete_token(access_token)
     return (
         jsonify(message="Successful logout"),
         HTTPStatus.OK,
