@@ -4,7 +4,6 @@ from flask_jwt_extended import (
     verify_jwt_in_request,
     get_jwt,
     create_access_token,
-    decode_token,
 )
 from functools import wraps
 from uuid import uuid4, UUID
@@ -32,23 +31,22 @@ def create_tokens(identity: str, additional_claims: dict) -> tuple[str, str]:
     return str(access_token), str(refresh_token)
 
 
-def put_token(user_id: UUID, access_token: str, refresh_token: str) -> None:
+def put_token(user_id: UUID, jti: UUID, refresh_token: str) -> None:
     """
     Puts refresh token into Redis.
     """
     db.redis.set(
-        str(user_id) + ":" + str(decode_token(access_token)["jti"]),
+        str(user_id) + ":" + str(jti),
         refresh_token,
         ex=timedelta(minutes=settings.auth_refresh_token_minutes),
     )
 
 
-def get_token(access_token: str) -> str:
+def get_token(user_id: UUID, jti: UUID) -> str:
     """
     Gets refresh token for given access token from Redis.
     """
-    payload = decode_token(access_token)
-    return db.redis.get(str(payload["sub"]) + ":" + str(payload["jti"]))
+    return db.redis.get(str(user_id) + ":" + str(jti))
 
 
 def count_tokens(user_id: UUID) -> int:
@@ -69,18 +67,11 @@ def delete_all_tokens(user_id: UUID) -> None:
         db.redis.delete(key)
 
 
-def delete_token(access_token: str) -> None:
+def delete_token(user_id: UUID, jti: UUID) -> None:
     """
     Deletes refresh token for given user from Redis.
     """
-    payload = decode_token(access_token)
-    db.redis.delete(str(payload["sub"]) + ":" + str(payload["jti"]))
-
-
-def is_correct_token():
-    # в базе будут храниться токены, будем проверять,
-    # есть ли приходящий рефреш токен в базе.
-    pass
+    db.redis.delete(str(user_id) + ":" + str(jti))
 
 
 def register_tokens(app):
@@ -105,7 +96,6 @@ def admin_required():
         def decorator(*args, **kwargs):
             verify_jwt_in_request()
             claims = get_jwt()
-            print(claims)
             if claims["admin"] == True:
                 return fn(*args, **kwargs)
             else:
