@@ -102,12 +102,38 @@ def logout_all():
 
 @sessions.put("/")
 def refresh():
-    user = User.query.get(get_jwt_identity())
+    """
+    1. Достать access токен из заголовка
+    2. Достать из Redis refresh токен по полям sub и jti из access токена
+    3. Сравнить refresh токен из Redis и из тела запроса
+    4. Прочитать данные о пользователе из Postgres
+    5. Создать новые access и refresh токены
+    6. Записать новый refresh токен в Redis
+    7. Удалить старый refresh токен из Redis
+    8. Вернуть новые access и refresh токены
+    """
     auth_header = request.headers.get('Authorization')
     access_token = auth_header.split(" ")[1]
-    refresh_token = get_token(access_token)
+    refresh_token_redis = get_token(access_token)
+    refresh_token_json = request.json.get("refresh_token")
+    if refresh_token_redis != refresh_token_json:
+        return (
+            jsonify(message="Refresh токен не найден"),
+            HTTPStatus.UNAUTHORIZED,
+        )
+    payload = decode_token(access_token, allow_expired=True)
+    user = User.query.get(payload["sub"])
+    additional_claims = {
+        "email": user.email,
+        "roles": user.role_names,
+        "admin": user.is_admin,
+        "userAgent": payload["userAgent"],
+        "userIP": payload["userIP"],
+    }
+    access_token, refresh_token = create_tokens(user.id, additional_claims)
+    put_token(user.id, access_token, refresh_token)
     delete_token(access_token)
     return (
-        jsonify(message="Successful logout"),
+        jsonify(access=access_token, refresh=refresh_token),
         HTTPStatus.OK,
     )

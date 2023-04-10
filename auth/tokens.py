@@ -12,6 +12,7 @@ from datetime import timedelta
 from email_validator import validate_email, EmailNotValidError
 import db
 from settings import settings
+from http import HTTPStatus
 
 
 def is_valid_email(email: str) -> str:
@@ -47,9 +48,7 @@ def get_token(access_token: str) -> str:
     Gets refresh token for given access token from Redis.
     """
     payload = decode_token(access_token)
-    return db.redis.get(
-        str(payload["sub"]) + ":" + str(payload["jti"])
-    )
+    return db.redis.get(str(payload["sub"]) + ":" + str(payload["jti"]))
 
 
 def count_tokens(user_id: UUID) -> int:
@@ -93,7 +92,7 @@ def register_tokens(app):
         Изменяет возвращаемый HTTP код при отсутствии access-токена.
         https://flask-jwt-extended.readthedocs.io/en/stable/changing_default_behavior/
         """
-        return jsonify(message=reason), 401
+        return jsonify(message=reason), HTTPStatus.UNAUTHORIZED  # 401
 
 
 def admin_required():
@@ -110,7 +109,10 @@ def admin_required():
             if claims["admin"] == True:
                 return fn(*args, **kwargs)
             else:
-                return jsonify(message="Действие разрешено только администратору"), 403
+                return (
+                    jsonify(message="Действие разрешено только администратору"),
+                    HTTPStatus.FORBIDDEN, # 403
+                )
 
         return decorator
 
