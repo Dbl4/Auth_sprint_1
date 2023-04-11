@@ -4,7 +4,6 @@ from flask_jwt_extended import (
     verify_jwt_in_request,
     get_jwt,
     create_access_token,
-    decode_token,
 )
 from functools import wraps
 from uuid import uuid4, UUID
@@ -12,13 +11,14 @@ from datetime import timedelta
 from email_validator import validate_email, EmailNotValidError
 import db
 from settings import settings
+from http import HTTPStatus
+
 
 def is_valid_email(email: str) -> str:
     try:
         return validate_email(email).email
     except EmailNotValidError as err:
         abort(422, description="Email is not valid.")
-
 
 
 def create_tokens(identity: str, additional_claims: dict) -> tuple[str, str]:
@@ -31,24 +31,22 @@ def create_tokens(identity: str, additional_claims: dict) -> tuple[str, str]:
     return str(access_token), str(refresh_token)
 
 
-def put_token(user_id: UUID, access_token: str, refresh_token: str) -> None:
+def put_token(user_id: UUID, jti: UUID, refresh_token: str) -> None:
     """
     Puts refresh token into Redis.
     """
     db.redis.set(
-        str(user_id) + ":" + str(decode_token(access_token)["jti"]),
+        str(user_id) + ":" + str(jti),
         refresh_token,
         ex=timedelta(minutes=settings.auth_refresh_token_minutes),
     )
 
 
-def get_token(user_id: UUID, access_token: str) -> str:
+def get_token(user_id: UUID, jti: UUID) -> str:
     """
     Gets refresh token for given access token from Redis.
     """
-    return db.redis.get(
-        str(user_id) + ":" + str(decode_token(access_token)["jti"])
-    )
+    return db.redis.get(str(user_id) + ":" + str(jti))
 
 
 def count_tokens(user_id: UUID) -> int:
@@ -78,10 +76,11 @@ def delete_all_tokens(user_id: UUID) -> None:
         db.redis.delete(key)
 
 
-def is_correct_token():
-    # в базе будут храниться токены, будем проверять,
-    # есть ли приходящий рефреш токен в базе.
-    pass
+def delete_token(user_id: UUID, jti: UUID) -> None:
+    """
+    Deletes refresh token for given user from Redis.
+    """
+    db.redis.delete(str(user_id) + ":" + str(jti))
 
 
 def register_tokens(app):
@@ -93,23 +92,26 @@ def register_tokens(app):
         Изменяет возвращаемый HTTP код при отсутствии access-токена.
         https://flask-jwt-extended.readthedocs.io/en/stable/changing_default_behavior/
         """
-        return jsonify(message=reason), 401
+        return jsonify(message=reason), HTTPStatus.UNAUTHORIZED  # 401
 
 
 def admin_required():
     """
     Decorator function for endpoints that allow only admins.
     """
+
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
             verify_jwt_in_request()
             claims = get_jwt()
-            print(claims)
             if claims["admin"] == True:
                 return fn(*args, **kwargs)
             else:
-                return jsonify(message="Действие разрешено только администратору"), 403
+                return (
+                    jsonify(message="Действие разрешено только администратору"),
+                    HTTPStatus.FORBIDDEN, # 403
+                )
 
         return decorator
 

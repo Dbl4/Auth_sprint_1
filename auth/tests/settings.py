@@ -29,4 +29,4 @@ def login_user(test_client):
             "user-ip": faker.ipv4(),
         },
     )
-    return response.json['access_token'], response.json['refresh_token']
+    return response.json['access'], response.json['refresh']

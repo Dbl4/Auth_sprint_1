@@ -1,6 +1,7 @@
 from uuid import uuid4
 from tests.settings import login_user, create_user
 
+
 def test_create_role(test_client, session, faker):
     """
     GIVEN 
@@ -64,7 +65,7 @@ def test_rename_role(test_client, session, faker):
         "/v1/roles/",
         json={"name": name},
         headers={"Authorization": "Bearer {}".format(access_token)},
-    )    
+    )
     id = response.json["id"]
 
     new_name = faker.word()
