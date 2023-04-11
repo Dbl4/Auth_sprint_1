@@ -1,7 +1,7 @@
+from http import HTTPStatus
+
 from settings import settings
 from tests.settings import login_user, create_user
-from models import User
-from password import hash_password
 
 
 def test_login(test_client, session, faker):
@@ -21,7 +21,7 @@ def test_login(test_client, session, faker):
             "user-ip": faker.ipv4(),
         },
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_check(test_client, session, faker):
@@ -36,7 +36,7 @@ def test_check(test_client, session, faker):
         "/v1/sessions/",
         headers={"Authorization": "Bearer {}".format(access_token)},
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_unauthorized_permissions(test_client, session):
@@ -47,4 +47,4 @@ def test_unauthorized_permissions(test_client, session):
     THEN HTTP code 401 is returned
     """
     response = test_client.get("/v1/sessions/")
-    assert response.status_code == 401
+    assert response.status_code == HTTPStatus.UNAUTHORIZED

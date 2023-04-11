@@ -133,7 +133,7 @@ def refresh():
     new_access_token, new_refresh_token = create_tokens(user.id, additional_claims)
     new_claims = decode_token(new_access_token)
     put_token(user.id, new_claims["jti"], new_refresh_token)
-    delete_token(access_token)
+    delete_token(claims["sub"], claims["jti"])
     return (
         jsonify(access=new_access_token, refresh=new_refresh_token),
         HTTPStatus.OK,
