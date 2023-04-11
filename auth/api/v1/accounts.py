@@ -3,16 +3,29 @@ from datetime import datetime
 from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.v1.api_models import spectree, Signup
 from db import sql
-from models import User
+from models import User, AuthHistory
 from password import hash_password, is_correct_password
 from tokens import is_valid_email
 
 accounts = Blueprint("accounts", __name__, url_prefix="/accounts")
+
+
+@accounts.get("/")
+@jwt_required()
+def get():
+    claims = get_jwt()
+    user = User.query.get(claims["sub"])
+    auth_history = AuthHistory.query.filter_by(user_id=user.id).order_by(AuthHistory.created.desc()).all()
+    return jsonify(
+        email=claims["email"],
+        sessions=len(auth_history),
+        history=[{'date': row.created, 'action': '' if row.action is None else row.action} for row in auth_history]
+    )
 
 
 @accounts.post("/")
