@@ -125,4 +125,8 @@ def test_refresh_not_equal(test_client, session):
         headers={"Authorization": "Bearer {}".format(access_token)},
         json={"refresh_token": refresh_token},
     )
-    assert response.json != {"access": access_token, "refresh": refresh_token}
+    access = response.json["access"]
+    refresh = response.json["refresh"]
+    if access and refresh:
+        assert access != access_token
+        assert refresh != refresh_token

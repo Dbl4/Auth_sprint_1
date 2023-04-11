@@ -24,7 +24,7 @@ def signup():
     if user:
         return (
             jsonify(message="User already registered"),
-            HTTPStatus.BAD_REQUEST,
+            HTTPStatus.CONFLICT,
         )
     id = uuid4()
     user = User(id=id, email=email, password=password)
@@ -34,7 +34,7 @@ def signup():
     except SQLAlchemyError as err:
         return (
             jsonify(message=err),
-            HTTPStatus.BAD_REQUEST,
+            HTTPStatus.CONFLICT,
         )
 
     return jsonify(message="User is created.", id=id, email=email)
@@ -56,7 +56,7 @@ def change(user_id: UUID):
     if is_correct_password(user.password, update_password):
         return (
             jsonify(message="Passwords match"),
-            HTTPStatus.BAD_REQUEST,
+            HTTPStatus.CONFLICT,
         )
     try:
         user.password = hash_password(update_password)
@@ -65,7 +65,7 @@ def change(user_id: UUID):
     except SQLAlchemyError as err:
         return (
             jsonify(message=err),
-            HTTPStatus.BAD_REQUEST,
+            HTTPStatus.CONFLICT,
         )
 
     return jsonify(message="User password is changed.", id=user_id, email=email)
