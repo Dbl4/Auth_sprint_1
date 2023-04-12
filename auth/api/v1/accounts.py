@@ -1,4 +1,4 @@
-from uuid import uuid4, UUID
+import uuid
 from datetime import datetime
 from http import HTTPStatus
 
@@ -39,49 +39,62 @@ def signup() -> Response:
             jsonify(message="User already registered"),
             HTTPStatus.CONFLICT,
         )
-    id = uuid4()
-    user = User(id=id, email=email, password=password)
+    user = User(id=uuid.uuid4(), email=email, password=password)
     sql.session.add(user)
     try:
         sql.session.commit()
-    except SQLAlchemyError as err:
-        return (
-            jsonify(message=err),
-            HTTPStatus.CONFLICT,
+        auth_history = AuthHistory(
+            user_id=user.id,
+            user_agent="",
+            user_ip="",
+            action="signup",
         )
-
-    return jsonify(message="User is created.", id=id, email=email)
-
-
-@accounts.patch("/")
-@spectree.validate(json=Signup)
-@jwt_required()
-def change(user_id: UUID) -> Response:
-    # После изменения email пользователя надо обновлять токен, потому что email записан в payload
-    email = is_valid_email(request.json("email"))
-    update_password = request.json.get("password")
-    user = User.query.get(user_id)
-    if not user:
-        return (
-            jsonify(message="User does not exists"),
-            HTTPStatus.NOT_FOUND,
-        )
-    if is_correct_password(user.password, update_password):
-        return (
-            jsonify(message="Passwords match"),
-            HTTPStatus.CONFLICT,
-        )
-    try:
-        user.password = hash_password(update_password)
-        user.modified = datetime.utcnow()
+        sql.session.add(auth_history)
         sql.session.commit()
     except SQLAlchemyError as err:
         return (
             jsonify(message=err),
             HTTPStatus.CONFLICT,
         )
+    return jsonify(message="User is created.", id=user.id, email=user.email)
 
-    return jsonify(message="User password is changed.", id=user_id, email=email)
+
+@accounts.patch("/")
+@jwt_required()
+def change() -> Response:
+    claim = get_jwt()
+    user_id = claim["sub"]
+    update_email = request.json.get("email")
+    update_password = request.json.get("password")
+    user = User.query.get(user_id)
+    if update_email:
+        user.email = is_valid_email(update_email)
+    if update_password:
+        user.password = hash_password(update_password)
+    user.modified = datetime.utcnow()
+    sql.session.add(user)
+    auth_history = AuthHistory(
+        user_id=user.id,
+        user_agent="",
+        user_ip="",
+        action="change-profile",
+    )
+    sql.session.add(auth_history)
+    try:
+        sql.session.commit()
+    except SQLAlchemyError as err:
+        return (
+            jsonify(message=err),
+            HTTPStatus.CONFLICT,
+        )
+    else:
+        if update_email:
+            delete_all_tokens(user_id)
+        return jsonify(
+            message="User email/password is changed.",
+            id=user.id,
+            email=user.email
+        )
 
 
 @accounts.delete("/")

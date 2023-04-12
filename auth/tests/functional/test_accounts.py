@@ -31,7 +31,6 @@ def test_get(test_client: Client, session: Session) -> None:
 
 def test_post(test_client: Client, faker: Faker) -> None:
     email = faker.email('test', 'example123.com')
-    print(email)
     response = test_client.post(
         "/v1/accounts/",
         json={'email': email, 'password': faker.password()},
@@ -45,7 +44,44 @@ def test_post(test_client: Client, faker: Faker) -> None:
 
 
 def test_patch(test_client: Client, session: Session, faker: Faker) -> None:
-    pass
+    create_user(session=session)
+    access_token, _ = login_user(test_client)
+    new_password = faker.password()
+    response = test_client.patch(
+        "/v1/accounts/",
+        headers={"Authorization": "Bearer {}".format(access_token)},
+        json={'password': new_password},
+    )
+    assert response.status_code == HTTPStatus.OK
+    response = test_client.get(
+        "/v1/accounts/",
+        headers={"Authorization": "Bearer {}".format(access_token)},
+    )
+    assert response.status_code == HTTPStatus.OK
+    new_email = faker.email('test', 'example123.com')
+    response = test_client.patch(
+        "/v1/accounts/",
+        headers={"Authorization": "Bearer {}".format(access_token)},
+        json={'email': new_email},
+    )
+    assert response.status_code == HTTPStatus.OK
+    response = test_client.post(
+        "/v1/sessions/",
+        json={
+            "email": new_email,
+            "password": new_password,
+            "user-agent": faker.user_agent(),
+            "user-ip": faker.ipv4(),
+        },
+    )
+    assert response.status_code == HTTPStatus.OK
+    response = test_client.get(
+        "/v1/accounts/",
+        headers={"Authorization": "Bearer {}".format(response.json["access"])},
+    )
+    assert response.status_code == HTTPStatus.OK
+
+
 
 
 def test_delete(test_client: Client, session: Session) -> None:

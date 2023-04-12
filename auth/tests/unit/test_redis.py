@@ -14,12 +14,12 @@ def test_tokens(test_client, session):
         access_token, refresh_token = login_user(test_client)
         put_token(
             user_id=user_id,
-            access_token=access_token,
+            jti=access_token,
             refresh_token=refresh_token,
         )
     assert refresh_token == get_token(user_id, access_token)
     assert 3 == count_tokens(user_id=user_id)
-    delete_token(user_id=user_id, access_token=access_token)
+    delete_token(user_id=user_id, jti=access_token)
     assert 2 == count_tokens(user_id=user_id)
     delete_all_tokens(user_id=user_id)
     assert 0 == count_tokens(user_id=user_id)
