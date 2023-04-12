@@ -2,7 +2,7 @@ from uuid import uuid4, UUID
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
 from flask_jwt_extended import jwt_required, get_jwt
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -10,27 +10,27 @@ from api.v1.api_models import spectree, Signup
 from db import sql
 from models import User, AuthHistory
 from password import hash_password, is_correct_password
-from tokens import is_valid_email
+from tokens import is_valid_email, count_tokens, delete_all_tokens
 
 accounts = Blueprint("accounts", __name__, url_prefix="/accounts")
 
 
 @accounts.get("/")
 @jwt_required()
-def get():
+def get() -> Response:
     claims = get_jwt()
     user = User.query.get(claims["sub"])
     auth_history = AuthHistory.query.filter_by(user_id=user.id).order_by(AuthHistory.created.desc()).all()
     return jsonify(
         email=claims["email"],
-        sessions=len(auth_history),
+        sessions=count_tokens(user),
         history=[{'date': row.created, 'action': '' if row.action is None else row.action} for row in auth_history]
     )
 
 
 @accounts.post("/")
 @spectree.validate(json=Signup)
-def signup():
+def signup() -> Response:
     email = is_valid_email(request.json.get("email"))
     password = hash_password(request.json.get("password"))
     user = User.query.filter_by(email=email).first()
@@ -56,7 +56,7 @@ def signup():
 @accounts.patch("/")
 @spectree.validate(json=Signup)
 @jwt_required()
-def change(user_id: UUID):
+def change(user_id: UUID) -> Response:
     # После изменения email пользователя надо обновлять токен, потому что email записан в payload
     email = is_valid_email(request.json("email"))
     update_password = request.json.get("password")
@@ -82,3 +82,18 @@ def change(user_id: UUID):
         )
 
     return jsonify(message="User password is changed.", id=user_id, email=email)
+
+
+@accounts.delete("/")
+@jwt_required()
+def delete() -> Response:
+    claims = get_jwt()
+    user = User.query.get(claims["sub"])
+    delete_all_tokens(user)
+    try:
+        sql.session.delete(user)
+        sql.session.commit()
+    except SQLAlchemyError as e:
+        return jsonify(message=e), HTTPStatus.CONFLICT
+    else:
+        return jsonify(message='Пользователь удален'), HTTPStatus.OK
