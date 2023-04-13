@@ -50,6 +50,7 @@ def put(role_id):
 @roles.delete("/<uuid:role_id>/")
 @admin_required()
 def delete(role_id):
+    ## при удалении роли, нужно удалять у всех пользователей
     role = sql.session.get(Role, role_id)
     if not role:
         return "Роль не найдена", HTTPStatus.NOT_FOUND
