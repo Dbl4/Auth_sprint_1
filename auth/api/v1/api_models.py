@@ -8,7 +8,6 @@ class Signup(BaseModel):
 
 
 class RolesPost(BaseModel):
-    id: str
     name: str
 
     @validator('name')
