@@ -126,13 +126,11 @@ def get_user_roles(user_id: UUID):
     return jsonify(roles=roles), HTTPStatus.OK
 
 
-@users.put("/<uuid:user_id>/roles")
+@users.put("/<uuid:user_id>/roles/<uuid:role_id>/")
 @admin_required()
-@spectree.validate(json=RolesPost)
-def put_user_roles(user_id: UUID):
-    assignment_role_id = request.json.get("role_id")
+def put_user_roles(user_id: UUID, role_id: UUID):
     user = User.query.get(user_id)
-    new_role = Role.query.get(assignment_role_id)
+    new_role = Role.query.get(role_id)
 
     if not new_role:
         return (
@@ -161,18 +159,16 @@ def put_user_roles(user_id: UUID):
 
     return jsonify(
         message="User is assigned a role",
-        id=assignment_role_id,
+        id=role_id,
         name=new_role.name
     ), HTTPStatus.OK
 
 
-@users.delete("/<uuid:user_id>/roles")
+@users.delete("/<uuid:user_id>/roles/<uuid:role_id>/")
 @admin_required()
-@spectree.validate(json=RolesPost)
-def delete_user_roles(user_id: UUID):
-    assignment_role_id = request.json.get("role_id")
+def delete_user_roles(user_id: UUID, role_id: UUID):
     user = User.query.get(user_id)
-    del_role = Role.query.get(assignment_role_id)
+    del_role = Role.query.get(role_id)
 
     if not del_role:
         return (
@@ -201,6 +197,6 @@ def delete_user_roles(user_id: UUID):
 
     return jsonify(
         message="User removed from role",
-        id=assignment_role_id,
+        id=role_id,
         name=del_role.name
     ), HTTPStatus.OK
