@@ -59,12 +59,12 @@ def count_tokens(user_id: UUID) -> int:
     return count
 
 
-def delete_token(user_id: UUID, access_token: str) -> None:
+def delete_token(user_id: UUID, jti: str) -> None:
     """
     Delete given refresh token from Redis.
     """
     db.redis.delete(
-        str(user_id) + ":" + str(decode_token(access_token)["jti"])
+        str(user_id) + ":" + str(jti)
     )
 
 
@@ -74,13 +74,6 @@ def delete_all_tokens(user_id: UUID) -> None:
     """
     for key in db.redis.scan_iter(f"{user_id}:*"):
         db.redis.delete(key)
-
-
-def delete_token(user_id: UUID, jti: UUID) -> None:
-    """
-    Deletes refresh token for given user from Redis.
-    """
-    db.redis.delete(str(user_id) + ":" + str(jti))
 
 
 def register_tokens(app):

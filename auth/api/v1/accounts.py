@@ -36,10 +36,10 @@ def signup() -> Response:
     user = User.query.filter_by(email=email).first()
     if user:
         return (
-            jsonify(message="User already registered"),
+            jsonify(message="Пользователь с этим e-mail уже зарегистрирован"),
             HTTPStatus.CONFLICT,
         )
-    user = User(id=uuid.uuid4(), email=email, password=password)
+    user = User(email=email, password=password)
     sql.session.add(user)
     try:
         sql.session.commit()
@@ -56,17 +56,16 @@ def signup() -> Response:
             jsonify(message=err),
             HTTPStatus.CONFLICT,
         )
-    return jsonify(message="User is created.", id=user.id, email=user.email)
+    return jsonify(message="Успешная регистрация", id=user.id, email=user.email)
 
 
 @accounts.patch("/")
 @jwt_required()
 def change() -> Response:
-    claim = get_jwt()
-    user_id = claim["sub"]
+    claims = get_jwt()
     update_email = request.json.get("email")
     update_password = request.json.get("password")
-    user = User.query.get(user_id)
+    user = User.query.get(claims["sub"])
     if update_email:
         user.email = is_valid_email(update_email)
     if update_password:
@@ -75,8 +74,8 @@ def change() -> Response:
     sql.session.add(user)
     auth_history = AuthHistory(
         user_id=user.id,
-        user_agent="",
-        user_ip="",
+        user_agent=claims["userAgent"],
+        user_ip=claims["userIP"],
         action="change-profile",
     )
     sql.session.add(auth_history)
@@ -89,9 +88,9 @@ def change() -> Response:
         )
     else:
         if update_email:
-            delete_all_tokens(user_id)
+            delete_all_tokens(user.id)
         return jsonify(
-            message="User email/password is changed.",
+            message="Успешное обновление данных",
             id=user.id,
             email=user.email
         )
@@ -109,4 +108,4 @@ def delete() -> Response:
     except SQLAlchemyError as e:
         return jsonify(message=e), HTTPStatus.CONFLICT
     else:
-        return jsonify(message='Пользователь удален'), HTTPStatus.OK
+        return jsonify(message='Аккаунт пользователя успешно удален'), HTTPStatus.OK
