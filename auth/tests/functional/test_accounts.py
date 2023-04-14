@@ -9,6 +9,11 @@ from tests.settings import login_user, create_user
 
 
 def test_get(test_client: Client, session: Session) -> None:
+    """
+    GIVEN User exists and authrized
+    WHEN GET request is sent
+    THEN HTTP code 401 UNAUTHORIZED is returned
+    """
     create_user(session=session)
     access_token, _ = login_user(test_client)
     response = test_client.get(
@@ -30,6 +35,11 @@ def test_get(test_client: Client, session: Session) -> None:
 
 
 def test_post(test_client: Client, faker: Faker) -> None:
+    """
+    GIVEN User is not logged in
+    WHEN POST request is sent
+    THEN User record added to DB (200 OK), user can't sign up with same credentials second time (409 CONFLICT)
+    """
     email = faker.email('test', 'example123.com')
     response = test_client.post(
         "/v1/accounts/",
@@ -44,6 +54,11 @@ def test_post(test_client: Client, faker: Faker) -> None:
 
 
 def test_patch(test_client: Client, session: Session, faker: Faker) -> None:
+    """
+    GIVEN User exists and authorized
+    WHEN PATCH request is sent
+    THEN Email and/or password is changed (200 OK), user able to login with new credentials after that (200 OK), and make some other requests (200 OK)
+    """
     create_user(session=session)
     access_token, _ = login_user(test_client)
     new_password = faker.password()
@@ -85,6 +100,11 @@ def test_patch(test_client: Client, session: Session, faker: Faker) -> None:
 
 
 def test_delete(test_client: Client, session: Session) -> None:
+    """
+    GIVEN User exists and authorized
+    WHEN DELETE request is sent
+    THEN User record deleted from DB (200 OK) and can't sign in second time (403 FORBIDDEN)
+    """
     create_user(session=session)
     access_token, _ = login_user(test_client)
     response = test_client.delete(
@@ -101,6 +121,11 @@ def test_delete(test_client: Client, session: Session) -> None:
 
 
 def test_unauthorized_permissions(test_client: Client):
+    """
+    GIVEN User is not logged in
+    WHEN User makes any request to any endpoint under /accounts/ (except POST)
+    THEN Request declined (401 UNAUTHORIZED)
+    """
     response = test_client.get("/v1/accounts/")
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     response = test_client.patch("/v1/accounts/")
