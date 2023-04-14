@@ -22,12 +22,12 @@ def get_users():
     users = []
     for user in User.query.all():
         user_data = {
-            "user_id": user.ud,
+            "user_id": user.id,
             "email": user.email,
             "created": user.created,
             "modified": user.modified,
         }
-        users.append(user_data.to_json())
+        users.append(user_data)
     return jsonify(users)
 
 
