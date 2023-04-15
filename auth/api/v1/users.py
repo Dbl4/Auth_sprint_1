@@ -67,7 +67,7 @@ def change(user_id: UUID):
             update_password and is_correct_password(user.password, update_password):
         return (
             jsonify(message="Emails and password match"),
-            HTTPStatus.BAD_REQUEST,
+            HTTPStatus.CONFLICT,
         )
     else:
         user.email = is_valid_email(update_email)
@@ -112,7 +112,7 @@ def delete_user(user_id: UUID):
     return jsonify(message="User deleted"), HTTPStatus.OK
 
 
-@users.get("/<uuid:user_id>/roles")
+@users.get("/<uuid:user_id>/roles/")
 @admin_required()
 def get_user_roles(user_id: UUID):
     user = User.query.get(user_id)
@@ -189,7 +189,7 @@ def delete_user_roles(user_id: UUID, role_id: UUID):
             HTTPStatus.CONFLICT,
         )
 
-    user.roles.delete(del_role)
+    user.roles.remove(del_role)
     try:
         sql.session.commit()
     except SQLAlchemyError as e:
