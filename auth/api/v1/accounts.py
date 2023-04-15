@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 from http import HTTPStatus
 
@@ -66,10 +65,18 @@ def change() -> Response:
     update_email = request.json.get("email")
     update_password = request.json.get("password")
     user = User.query.get(claims["sub"])
-    if update_email:
+    has_changes = False
+    if update_email and user.email != update_email:
         user.email = is_valid_email(update_email)
-    if update_password:
+        has_changes = True
+    if update_password and not is_correct_password(user.password, update_password):
         user.password = hash_password(update_password)
+        has_changes = True
+    if not has_changes:
+        return (
+            jsonify(message="Данные не были изменены"),
+            HTTPStatus.CONFLICT,
+        )
     user.modified = datetime.utcnow()
     sql.session.add(user)
     auth_history = AuthHistory(
@@ -87,8 +94,6 @@ def change() -> Response:
             HTTPStatus.CONFLICT,
         )
     else:
-        if update_email:
-            delete_all_tokens(user.id)
         return jsonify(
             message="Успешное обновление данных",
             id=user.id,
