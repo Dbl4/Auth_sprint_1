@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from api.v1.api_models import spectree, RolesPost
 
 from db import sql
-from models import Role
+from models import Role, User
 from tokens import admin_required
 
 roles = Blueprint("roles", __name__, url_prefix="/roles")
@@ -50,10 +50,12 @@ def put(role_id):
 @roles.delete("/<uuid:role_id>/")
 @admin_required()
 def delete(role_id):
-    ## при удалении роли, нужно удалять у всех пользователей
     role = sql.session.get(Role, role_id)
     if not role:
         return "Роль не найдена", HTTPStatus.NOT_FOUND
+    for user in User.query.all():
+        if role in user.roles:
+            user.roles.remove(role)
     sql.session.delete(role)
     sql.session.commit()
     return "Роль удалена", HTTPStatus.NO_CONTENT
