@@ -574,7 +574,7 @@ paths:
         '404':
           description: NOT_FOUND. Роль не найдена
 
-  /account/:
+  /accounts/:
     # Интерфейс управления своим аккаунтом для пользователя
     get:
       summary: Получение информации об истории входов и прочее
@@ -676,11 +676,16 @@ paths:
                   type: string
                   format: email
                   example: bob@example.com
+                password:
+                  type: string
+                  example: qwerty
       security:
         - bearerAuth: []
       responses:
         '200':
           description: Успешное обновление данных
+        '409':
+          description: CONFLICT. Данные не были изменены
         '401':
           $ref: '#/components/responses/JwtRequiredError'
 
