@@ -90,7 +90,7 @@ def test_delete_role(test_client, session, faker):
     WHEN DELETE requiest is sent
     THEN HTTP code 204 is received
     """
-    create_user(session=session, admin=True)
+    user_id = create_user(session=session, admin=True)
     access_token, refresh_token = login_user(test_client)
     name = faker.sentence(nb_words=3)
     response = test_client.post(
@@ -98,10 +98,15 @@ def test_delete_role(test_client, session, faker):
         json={"name": name},
         headers={"Authorization": "Bearer {}".format(access_token)},
     )
-    id = response.json["id"]
+    role_id = response.json["id"]
+
+    test_client.put(
+        f"/v1/users/{user_id}/roles/{role_id}/",
+        headers={"Authorization": "Bearer {}".format(access_token)},
+    )
 
     response = test_client.delete(
-        f"/v1/roles/{id}/",
+        f"/v1/roles/{role_id}/",
         headers={"Authorization": "Bearer {}".format(access_token)},
     )
     assert response.status_code == 204

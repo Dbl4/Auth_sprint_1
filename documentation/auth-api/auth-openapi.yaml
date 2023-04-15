@@ -139,6 +139,10 @@ paths:
                   type: string
                   format: email
                   example: bob@example.com
+                password:
+                  type: string
+                  format: password
+                  example: password1234
       security:
         - bearerAuth: []
       responses:
@@ -173,7 +177,7 @@ paths:
         '404':
           description: NOT_FOUND. Пользователь не найден
 
-  
+
   /users/{user_id}/roles/:
     get:
       summary: Получение списка ролей пользователя
@@ -213,6 +217,8 @@ paths:
           $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Пользователь не найден
+
+  /users/{user_id}/roles/{role_id}/:
     put:
       summary: Назначение пользователю роли
       tags:
@@ -224,17 +230,12 @@ paths:
           schema:
             type: string
             format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                role_id:
-                  type: string
-                  format: uuid
-                  description: role id
+        - in: path
+          required: true
+          name: role_id
+          schema:
+            type: string
+            format: uuid
       security:
         - bearerAuth: []
       responses:
@@ -258,8 +259,7 @@ paths:
           $ref: '#/components/responses/AdminRequiredError'
         '404':
           description: NOT_FOUND. Пользователь не найден
-          
-  /users/{user_id}/roles/{role_id}/:
+
     delete:
       summary: Снятие роли у пользователя
       tags:
@@ -289,7 +289,7 @@ paths:
         '404':
           description: NOT_FOUND. Пользователь или роль не найдены
 
-  
+
   /sessions/:
     # Интерфейсы, связанные с сессией пользователя на сайте.
     # Методы доступны любому авторизованному пользователю.
@@ -439,7 +439,7 @@ paths:
           $ref: "#/components/responses/JwtRequiredError"
         '403':
           description: FORBIDDEN. refresh токен не найден
-    
+
   /sessions/all/:
     delete:
       summary: Осуществление выхода пользователя на всех устройствах
@@ -453,7 +453,7 @@ paths:
           description: Успешный выход
         '401':
           $ref: '#/components/responses/JwtRequiredError'
-          
+
   /roles/:
     # Интерфейс управления списком ролей. Доступен администратору.
     get:
@@ -723,7 +723,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorMessage' 
+            $ref: '#/components/schemas/ErrorMessage'
           example:
             - message: Missing Authorization Header
 
@@ -732,6 +732,6 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorMessage' 
+            $ref: '#/components/schemas/ErrorMessage'
           example:
             - message: Действие разрешено только администратору

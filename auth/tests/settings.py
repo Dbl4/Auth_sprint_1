@@ -5,16 +5,21 @@ from models import User
 from password import hash_password
 
 
-def create_user(session, admin=False):
+def create_user(
+    session,
+    admin=False,
+    password=settings.test_user_password,
+    email=settings.test_user_email
+):
     session.add(
         User(
-            password=hash_password(settings.test_user_password),
-            email=settings.test_user_email,
+            password=hash_password(password),
+            email=email,
             is_admin=admin,
         )
     )
     session.commit()
-    user = User.query.filter_by(email=settings.test_user_email).first()
+    user = User.query.filter_by(email=email).first()
     return user.id
 
 

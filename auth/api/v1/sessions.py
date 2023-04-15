@@ -30,7 +30,7 @@ def login():
             HTTPStatus.FORBIDDEN,
         )
     auth_history = AuthHistory(
-        user_id=user.id, user_agent=user_agent, user_ip=user_ip
+        user_id=user.id, user_agent=user_agent, user_ip=user_ip, action="login"
     )
     db.sql.session.add(auth_history)
     try:
@@ -79,6 +79,20 @@ def check():
 def logout():
     claims = get_jwt()
     delete_token(claims["sub"], claims["jti"])
+    auth_history = AuthHistory(
+        user_id=claims["sub"],
+        user_agent=claims["userAgent"],
+        user_ip=claims["userIP"],
+        action="logout",
+    )
+    db.sql.session.add(auth_history)
+    try:
+        db.sql.session.commit()
+    except SQLAlchemyError as err:
+        return (
+            jsonify(message=err),
+            HTTPStatus.CONFLICT,
+        )
     return (
         jsonify(message="Successful logout"),
         HTTPStatus.OK,
@@ -90,6 +104,20 @@ def logout():
 def logout_all():
     claims = get_jwt()
     delete_all_tokens(claims["sub"])
+    auth_history = AuthHistory(
+        user_id=claims["sub"],
+        user_agent=claims["userAgent"],
+        user_ip=claims["userIP"],
+        action="logout_all",
+    )
+    db.sql.session.add(auth_history)
+    try:
+        db.sql.session.commit()
+    except SQLAlchemyError as err:
+        return (
+            jsonify(message=err),
+            HTTPStatus.CONFLICT,
+        )
     return (
         jsonify(message="Successful logout from all devices"),
         HTTPStatus.OK,
