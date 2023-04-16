@@ -27,8 +27,6 @@ def create_app(config):
         port=config["REDIS_PORT"],
         decode_responses=True,
     )
-
-    print(config["REDIS_PORT"])
     return app
 
 

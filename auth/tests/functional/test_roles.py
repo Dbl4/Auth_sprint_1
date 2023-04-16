@@ -153,5 +153,4 @@ def test_user_permissions(test_client, session):
         f"/v1/roles/{uuid4()}/",
         headers={"Authorization": "Bearer {}".format(access_token)},
     )
-    print(response.json)
     assert response.status_code == 403
