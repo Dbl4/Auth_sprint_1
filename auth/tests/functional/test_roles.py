@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from uuid import uuid4
 
 from tests.settings import create_user, login_user
@@ -15,19 +16,19 @@ def test_create_role(test_client, session, faker):
         faker: библиотека Faker
     """
     create_user(session=session, admin=True)
-    access_token, refresh_token = login_user(test_client)
+    access_token, _ = login_user(test_client)
     name = faker.sentence(nb_words=3)
     response = test_client.post(
         "/v1/roles/",
         json={"name": name},
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     response = test_client.get(
         "/v1/roles/",
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json[0]["name"] == name
 
 
@@ -42,13 +43,13 @@ def test_validation(test_client, session):
         session: сессия базы данных
     """
     create_user(session=session, admin=True)
-    access_token, refresh_token = login_user(test_client)
+    access_token, _ = login_user(test_client)
     response = test_client.post(
         "/v1/roles/",
         json={"not_valid": "actor"},
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 422
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     response = test_client.post(
         "/v1/roles/",
         json={"name": "actor"},
@@ -59,7 +60,7 @@ def test_validation(test_client, session):
         json={"not_valid": "actor"},
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 422
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 def test_rename_role(test_client, session, faker):
@@ -89,13 +90,13 @@ def test_rename_role(test_client, session, faker):
         json={"name": new_name},
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 204
+    assert response.status_code == HTTPStatus.NO_CONTENT
 
     response = test_client.get(
         "/v1/roles/",
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json[0]["name"] == new_name
 
 
@@ -129,7 +130,7 @@ def test_delete_role(test_client, session, faker):
         f"/v1/roles/{role_id}/",
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 204
+    assert response.status_code == HTTPStatus.NO_CONTENT
 
     response = test_client.get(
         "/v1/roles/",
@@ -148,13 +149,13 @@ def test_unauthorized_permissions(test_client):
         test_client: клиент для выполнения HTTP запросов
     """
     response = test_client.get("/v1/roles/")
-    assert response.status_code == 401
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
     response = test_client.post("/v1/roles/")
-    assert response.status_code == 401
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
     response = test_client.put(f"/v1/roles/{uuid4()}/")
-    assert response.status_code == 401
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
     response = test_client.delete(f"/v1/roles/{uuid4()}/")
-    assert response.status_code == 401
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_user_permissions(test_client, session):
@@ -181,4 +182,4 @@ def test_user_permissions(test_client, session):
         f"/v1/roles/{uuid4()}/",
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 403
+    assert response.status_code == HTTPStatus.FORBIDDEN

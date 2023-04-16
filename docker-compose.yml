@@ -130,9 +130,7 @@ services:
     restart: always
 
   auth:
-    build:
-      context: .
-      dockerfile: ./auth/Dockerfile
+    build: ./auth
     env_file:
       - .env
       - .env.docker
