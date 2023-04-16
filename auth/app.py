@@ -1,12 +1,10 @@
-from flask import Flask
-
+import db
 from api import v1
+from cli import register_cli
+from flask import Flask
 from flask_cors import CORS
 from redis import StrictRedis
-
-from cli import register_cli
 from settings import config
-import db
 from tokens import register_tokens
 
 
@@ -31,6 +29,7 @@ def create_app(config):
 
 
 app = create_app(config)
+
 
 def main():
     app.run(host="0.0.0.0", port=5000)

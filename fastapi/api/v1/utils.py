@@ -9,10 +9,7 @@ class PaginatedParams:
     def __init__(
         self,
         page: int = Query(
-            1,
-            alias="page[number]",
-            ge=1,
-            description="Номер страницы"
+            1, alias="page[number]", ge=1, description="Номер страницы"
         ),
         size: int = Query(
             5,

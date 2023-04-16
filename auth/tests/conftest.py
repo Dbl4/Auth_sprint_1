@@ -1,13 +1,10 @@
 import pytest
 from app import create_app
+from db import sql
+from flask_migrate import downgrade as flask_migrate_downgrade
+from flask_migrate import upgrade as flask_migrate_upgrade
 from settings import settings
 from sqlalchemy.engine import URL
-from db import sql
-from flask_migrate import upgrade as flask_migrate_upgrade
-from flask_migrate import downgrade as flask_migrate_downgrade
-from password import hash_password
-from models import User
-
 
 TEST_CONFIG = {
     "TESTING": True,

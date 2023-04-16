@@ -2,16 +2,20 @@ from http import HTTPStatus
 from uuid import uuid4
 
 import pytest
-
 from settings import settings
-from tests.settings import login_user, create_user
+
+from tests.settings import create_user, login_user
 
 
 @pytest.mark.parametrize(
     "email, password, expected_code",
     [
         (settings.test_user_email, settings.test_user_password, HTTPStatus.OK),
-        ("incorrect@gmail.com", settings.test_user_password, HTTPStatus.FORBIDDEN),
+        (
+            "incorrect@gmail.com",
+            settings.test_user_password,
+            HTTPStatus.FORBIDDEN,
+        ),
         (settings.test_user_email, "incorrect-password", HTTPStatus.FORBIDDEN),
         (
             "not-valid-email",
@@ -32,6 +36,11 @@ def test_login(
     GIVEN
     WHEN
     THEN
+
+    Args:
+        test_client: клиент для выполнения HTTP запросов
+        session: сессия базы данных
+        faker: библиотека Faker
     """
     create_user(session=session, admin=True)
 
@@ -52,12 +61,16 @@ def test_check(test_client, session):
     GIVEN admin user is logged in
     WHEN GET /sessions/ request with access-token comes
     THEN HTTP code 200 is returned
+
+    Args:
+        test_client: клиент для выполнения HTTP запросов
+        session: сессия базы данных
     """
     create_user(session=session, admin=True)
-    access_token, refresh_token = login_user(test_client)
+    access_token, _ = login_user(test_client)
     response = test_client.get(
         "/v1/sessions/",
-        headers={"Authorization": "Bearer {}".format(access_token)},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
     assert response.status_code == HTTPStatus.OK
 
@@ -68,6 +81,10 @@ def test_unauthorized_permissions(test_client, session):
     WHEN User makes any request to any endpoint under /sessions/,
       except POST /sessions/
     THEN HTTP code 401 is returned
+
+    Args:
+        test_client: клиент для выполнения HTTP запросов
+        session: сессия базы данных
     """
     create_user(session=session, admin=True)
     access_token, refresh_token = login_user(test_client)
@@ -80,49 +97,69 @@ def test_unauthorized_permissions(test_client, session):
 
     response = test_client.put(
         "/v1/sessions/",
-        headers={"Authorization": "Bearer {}".format(access_token)},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"refresh_token": uuid4()},
     )
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_logout(test_client, session):
+    """
+    Args:
+        test_client: клиент для выполнения HTTP запросов
+        session: сессия базы данных
+    """
     create_user(session=session, admin=True)
     access_token, refresh_token = login_user(test_client)
     response = test_client.delete(
         "/v1/sessions/",
-        headers={"Authorization": "Bearer {}".format(access_token)},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
     assert response.status_code == HTTPStatus.OK
 
 
 def test_logout_all(test_client, session):
+    """
+    Args:
+        test_client: клиент для выполнения HTTP запросов
+        session: сессия базы данных
+    """
     create_user(session=session, admin=True)
     access_token, refresh_token = login_user(test_client)
     response = test_client.delete(
         "/v1/sessions/all/",
-        headers={"Authorization": "Bearer {}".format(access_token)},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
     assert response.status_code == HTTPStatus.OK
 
 
 def test_refresh(test_client, session):
+    """
+    Args:
+        test_client: клиент для выполнения HTTP запросов
+        session: сессия базы данных
+    """
     create_user(session=session, admin=True)
     access_token, refresh_token = login_user(test_client)
     response = test_client.put(
         "/v1/sessions/",
-        headers={"Authorization": "Bearer {}".format(access_token)},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"refresh_token": refresh_token},
     )
     assert response.status_code == HTTPStatus.OK
 
 
 def test_refresh_not_equal(test_client, session):
+    """
+    Args:
+        test_client: клиент для выполнения HTTP запросов
+        session: сессия базы данных
+    """
     create_user(session=session, admin=True)
     access_token, refresh_token = login_user(test_client)
     response = test_client.put(
         "/v1/sessions/",
-        headers={"Authorization": "Bearer {}".format(access_token)},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"refresh_token": refresh_token},
     )
     access = response.json["access"]

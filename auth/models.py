@@ -18,7 +18,12 @@ users_roles = sql.Table(
         primary_key=True,
         nullable=False,
     ),
-    sql.Column("created", sql.DateTime, default=datetime.utcnow, nullable=False),
+    sql.Column(
+        "created",
+        sql.DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    ),
     sql.UniqueConstraint("user_id", "role_id"),
     schema="auth",
 )
@@ -39,7 +44,11 @@ class User(sql.Model):
     password = sql.Column(sql.String, nullable=False)
     is_admin = sql.Column(sql.Boolean, nullable=False, default=False)
     created = sql.Column(sql.DateTime, default=datetime.utcnow, nullable=False)
-    modified = sql.Column(sql.DateTime, default=datetime.utcnow, nullable=False)
+    modified = sql.Column(
+        sql.DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )
     roles = sql.relationship(
         "Role",
         secondary=users_roles,
@@ -63,13 +72,17 @@ class Role(sql.Model):
     )
     name = sql.Column(sql.String, unique=True, nullable=False)
     created = sql.Column(sql.DateTime, default=datetime.utcnow, nullable=False)
-    modified = sql.Column(sql.DateTime, default=datetime.utcnow, nullable=False)
+    modified = sql.Column(
+        sql.DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )
     users = sql.relationship(
         "User",
         secondary=users_roles,
         back_populates="roles",
     )
-    sql.UniqueConstraint("name"),
+    sql.UniqueConstraint("name")
 
     def __repr__(self):
         return f"<Role {self.name}>"

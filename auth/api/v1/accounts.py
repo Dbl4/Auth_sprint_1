@@ -1,15 +1,15 @@
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import Blueprint, jsonify, request, Response
-from flask_jwt_extended import jwt_required, get_jwt
-from sqlalchemy.exc import SQLAlchemyError
-
-from api.v1.api_models import spectree, Signup
+from api.v1.api_models import Signup, spectree
 from db import sql
-from models import User, AuthHistory
+from flask import Blueprint, Response, jsonify, request
+from flask_jwt_extended import get_jwt, jwt_required
 from password import hash_password, is_correct_password
-from tokens import is_valid_email, count_tokens, delete_all_tokens
+from sqlalchemy.exc import SQLAlchemyError
+from tokens import count_tokens, delete_all_tokens, is_valid_email
+
+from models import AuthHistory, User
 
 accounts = Blueprint("accounts", __name__, url_prefix="/accounts")
 
@@ -19,11 +19,21 @@ accounts = Blueprint("accounts", __name__, url_prefix="/accounts")
 def get() -> Response:
     claims = get_jwt()
     user = User.query.get(claims["sub"])
-    auth_history = AuthHistory.query.filter_by(user_id=user.id).order_by(AuthHistory.created.desc()).all()
+    auth_history = (
+        AuthHistory.query.filter_by(user_id=user.id)
+        .order_by(AuthHistory.created.desc())
+        .all()
+    )
     return jsonify(
         email=claims["email"],
         sessions=count_tokens(user),
-        history=[{'date': row.created, 'action': '' if row.action is None else row.action} for row in auth_history]
+        history=[
+            {
+                "date": row.created,
+                "action": "" if row.action is None else row.action,
+            }
+            for row in auth_history
+        ],
     )
 
 
@@ -55,7 +65,11 @@ def signup() -> Response:
             jsonify(message=err),
             HTTPStatus.CONFLICT,
         )
-    return jsonify(message="Успешная регистрация", id=user.id, email=user.email)
+    return jsonify(
+        message="Успешная регистрация",
+        id=user.id,
+        email=user.email,
+    )
 
 
 @accounts.patch("/")
@@ -69,7 +83,10 @@ def change() -> Response:
     if update_email and user.email != update_email:
         user.email = is_valid_email(update_email)
         has_changes = True
-    if update_password and not is_correct_password(user.password, update_password):
+    if update_password and not is_correct_password(
+        user.password,
+        update_password,
+    ):
         user.password = hash_password(update_password)
         has_changes = True
     if not has_changes:
@@ -97,7 +114,7 @@ def change() -> Response:
         return jsonify(
             message="Успешное обновление данных",
             id=user.id,
-            email=user.email
+            email=user.email,
         )
 
 
@@ -113,4 +130,7 @@ def delete() -> Response:
     except SQLAlchemyError as e:
         return jsonify(message=e), HTTPStatus.CONFLICT
     else:
-        return jsonify(message='Аккаунт пользователя успешно удален'), HTTPStatus.OK
+        return (
+            jsonify(message="Аккаунт пользователя успешно удален"),
+            HTTPStatus.OK,
+        )

@@ -1,9 +1,9 @@
 import click
 from db import sql
+from email_validator import EmailNotValidError, validate_email
+from password import hash_password
 
 from models import User
-from password import hash_password
-from email_validator import validate_email, EmailNotValidError
 
 
 def email_callback(ctx, param, value):
@@ -21,7 +21,11 @@ def register_cli(app):
     def create_admin(email: str, password: str) -> None:
         """Создать администратора пользователей"""
 
-        admin = User(password=hash_password(password), email=email, is_admin=True)
+        admin = User(
+            password=hash_password(password),
+            email=email,
+            is_admin=True,
+        )
         sql.session.add(admin)
         sql.session.commit()
         click.echo("Admin created")

@@ -1,11 +1,12 @@
 from http import HTTPStatus
+
+from api.v1.api_models import RolesPost, spectree
+from db import sql
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from api.v1.api_models import spectree, RolesPost
-
-from db import sql
-from models import Role, User
 from tokens import admin_required
+
+from models import Role, User
 
 roles = Blueprint("roles", __name__, url_prefix="/roles")
 

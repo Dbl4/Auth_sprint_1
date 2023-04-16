@@ -5,9 +5,8 @@ Revises:
 Create Date: 2023-04-03 00:08:35.149258
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "7541fab537ea"
@@ -50,7 +49,9 @@ def upgrade():
         sa.Column("user_ip", sa.String(), nullable=False),
         sa.Column("action", sa.String(), nullable=True),
         sa.Column("created", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(["user_id"], ["auth.users.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["user_id"], ["auth.users.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
         schema="auth",
     )

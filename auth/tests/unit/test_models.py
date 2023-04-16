@@ -1,8 +1,8 @@
 import pytest
-
-from models import User, Role
-
 from sqlalchemy.exc import IntegrityError
+
+from models import Role, User
+
 
 def test_duplicate_roles(session):
     """

@@ -1,9 +1,8 @@
-from flask import Blueprint
-
 from api.v1.accounts import accounts
-from api.v1.sessions import sessions
 from api.v1.roles import roles
+from api.v1.sessions import sessions
 from api.v1.users import users
+from flask import Blueprint
 
 v1 = Blueprint("v1", __name__, url_prefix="/v1")
 

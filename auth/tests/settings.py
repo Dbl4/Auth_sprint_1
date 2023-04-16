@@ -1,22 +1,22 @@
 from faker import Faker
-from settings import settings
-from faker import Faker
-from models import User
 from password import hash_password
+from settings import settings
+
+from models import User
 
 
 def create_user(
     session,
     admin=False,
     password=settings.test_user_password,
-    email=settings.test_user_email
+    email=settings.test_user_email,
 ):
     session.add(
         User(
             password=hash_password(password),
             email=email,
             is_admin=admin,
-        )
+        ),
     )
     session.commit()
     user = User.query.filter_by(email=email).first()
@@ -34,4 +34,4 @@ def login_user(test_client):
             "user-ip": faker.ipv4(),
         },
     )
-    return response.json['access'], response.json['refresh']
+    return response.json["access"], response.json["refresh"]

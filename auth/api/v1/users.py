@@ -1,17 +1,17 @@
-from uuid import UUID
 from datetime import datetime
 from http import HTTPStatus
+from uuid import UUID
 
-from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt
-from sqlalchemy.exc import SQLAlchemyError
-
-import db
-from api.v1.api_models import spectree, Signup, RolesPost
+from api.v1.api_models import Signup, spectree
 from db import sql
-from models import User, AuthHistory, Role
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import get_jwt
 from password import hash_password, is_correct_password
-from tokens import is_valid_email, admin_required, count_tokens, delete_all_tokens
+from sqlalchemy.exc import SQLAlchemyError
+from tokens import admin_required, count_tokens, delete_all_tokens
+from tokens import is_valid_email
+
+from models import AuthHistory, Role, User
 
 users = Blueprint("users", __name__, url_prefix="/users")
 
@@ -40,12 +40,22 @@ def get_user_detail(user_id: UUID):
             jsonify(message="User does not exists"),
             HTTPStatus.NOT_FOUND,
         )
-    auth_history = AuthHistory.query.filter_by(user_id=user.id).order_by(AuthHistory.created.desc()).all()
+    auth_history = (
+        AuthHistory.query.filter_by(user_id=user.id)
+        .order_by(AuthHistory.created.desc())
+        .all()
+    )
     return jsonify(
         email=user.email,
         sessions=count_tokens(user),
-        history=[{'date': row.created, 'action': '' if row.action is None else row.action} for row in auth_history],
-        roles=[{"id": role.id, "name": role.name} for role in user.roles]
+        history=[
+            {
+                "date": row.created,
+                "action": "" if row.action is None else row.action,
+            }
+            for row in auth_history
+        ],
+        roles=[{"id": role.id, "name": role.name} for role in user.roles],
     )
 
 
@@ -63,16 +73,18 @@ def change(user_id: UUID):
             HTTPStatus.NOT_FOUND,
         )
 
-    if update_email and user.email == update_email and \
-            update_password and is_correct_password(user.password, update_password):
+    if (
+        update_email
+        and user.email == update_email
+        and update_password
+        and is_correct_password(user.password, update_password)
+    ):
         return (
             jsonify(message="Emails and password match"),
             HTTPStatus.CONFLICT,
         )
-    else:
-        user.email = is_valid_email(update_email)
-        user.password = hash_password(update_password)
-
+    user.email = is_valid_email(update_email)
+    user.password = hash_password(update_password)
     user.modified = datetime.utcnow()
     sql.session.add(user)
     auth_history = AuthHistory(
@@ -90,7 +102,11 @@ def change(user_id: UUID):
             HTTPStatus.CONFLICT,
         )
 
-    return jsonify(message="User email/password is changed.", id=user_id, email=update_email)
+    return jsonify(
+        message="User email/password is changed.",
+        id=user_id,
+        email=update_email,
+    )
 
 
 @users.delete("/<uuid:user_id>/")
@@ -157,11 +173,14 @@ def put_user_roles(user_id: UUID, role_id: UUID):
     except SQLAlchemyError as e:
         return jsonify(message=e), HTTPStatus.CONFLICT
 
-    return jsonify(
-        message="User is assigned a role",
-        id=role_id,
-        name=new_role.name
-    ), HTTPStatus.OK
+    return (
+        jsonify(
+            message="User is assigned a role",
+            id=role_id,
+            name=new_role.name,
+        ),
+        HTTPStatus.OK,
+    )
 
 
 @users.delete("/<uuid:user_id>/roles/<uuid:role_id>/")
@@ -195,8 +214,11 @@ def delete_user_roles(user_id: UUID, role_id: UUID):
     except SQLAlchemyError as e:
         return jsonify(message=e), HTTPStatus.CONFLICT
 
-    return jsonify(
-        message="User removed from role",
-        id=role_id,
-        name=del_role.name
-    ), HTTPStatus.OK
+    return (
+        jsonify(
+            message="User removed from role",
+            id=role_id,
+            name=del_role.name,
+        ),
+        HTTPStatus.OK,
+    )

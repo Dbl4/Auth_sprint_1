@@ -1,18 +1,14 @@
 from http import HTTPStatus
 
-from flask import Blueprint, jsonify, request
-from sqlalchemy.exc import SQLAlchemyError
-from flask_jwt_extended import (
-    jwt_required,
-    get_jwt_identity,
-    get_jwt,
-    decode_token,
-)
-
 import db
-from models import User, AuthHistory, Role
-from tokens import create_tokens, is_valid_email, put_token, delete_token, get_token, delete_all_tokens
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import decode_token, get_jwt, jwt_required
 from password import is_correct_password
+from sqlalchemy.exc import SQLAlchemyError
+from tokens import create_tokens, delete_all_tokens, delete_token, get_token
+from tokens import is_valid_email, put_token
+
+from models import AuthHistory, Role, User
 
 sessions = Blueprint("sessions", __name__, url_prefix="/sessions")
 
@@ -30,7 +26,10 @@ def login():
             HTTPStatus.FORBIDDEN,
         )
     auth_history = AuthHistory(
-        user_id=user.id, user_agent=user_agent, user_ip=user_ip, action="login"
+        user_id=user.id,
+        user_agent=user_agent,
+        user_ip=user_ip,
+        action="login",
     )
     db.sql.session.add(auth_history)
     try:
@@ -41,7 +40,10 @@ def login():
             HTTPStatus.CONFLICT,
         )
     roles = (
-        db.sql.session.query(Role).join(User.roles).filter(User.id == user.id).all()
+        db.sql.session.query(Role)
+        .join(User.roles)
+        .filter(User.id == user.id)
+        .all()
     )
     role_names = [role.name for role in roles]
     additional_claims = {
@@ -68,7 +70,7 @@ def check():
                 "user-agent": claims["userAgent"],
                 "user-ip": claims["userIP"],
                 "roles": claims["roles"],
-            }
+            },
         ),
         HTTPStatus.OK,
     )
@@ -136,7 +138,7 @@ def refresh():
     7. Удалить старый refresh токен из Redis
     8. Вернуть новые access и refresh токены
     """
-    auth_header = request.headers.get('Authorization')
+    auth_header = request.headers.get("Authorization")
     access_token = auth_header.split(" ")[1]
     claims = decode_token(access_token, allow_expired=True)
     refresh_token_redis = get_token(claims["sub"], claims["jti"])
@@ -148,7 +150,10 @@ def refresh():
         )
     user = User.query.get(claims["sub"])
     roles = (
-        db.sql.session.query(Role).join(User.roles).filter(User.id == user.id).all()
+        db.sql.session.query(Role)
+        .join(User.roles)
+        .filter(User.id == user.id)
+        .all()
     )
     role_names = [role.name for role in roles]
     additional_claims = {
@@ -158,7 +163,10 @@ def refresh():
         "userAgent": claims["userAgent"],
         "userIP": claims["userIP"],
     }
-    new_access_token, new_refresh_token = create_tokens(user.id, additional_claims)
+    new_access_token, new_refresh_token = create_tokens(
+        user.id,
+        additional_claims,
+    )
     new_claims = decode_token(new_access_token)
     put_token(user.id, new_claims["jti"], new_refresh_token)
     delete_token(claims["sub"], claims["jti"])
