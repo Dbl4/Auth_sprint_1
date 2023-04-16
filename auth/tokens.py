@@ -18,7 +18,10 @@ def is_valid_email(email: str) -> str:
     try:
         return validate_email(email).email
     except EmailNotValidError as err:
-        abort(422, description="Email is not valid.")
+        abort(
+            HTTPStatus.UNPROCESSABLE_ENTITY, # 422
+            description="Email is not valid.",
+        )
 
 
 def create_tokens(identity: str, additional_claims: dict) -> tuple[str, str]:
