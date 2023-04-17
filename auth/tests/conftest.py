@@ -26,7 +26,7 @@ TEST_CONFIG = {
 }
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def app():
     app = create_app(TEST_CONFIG)
     with app.app_context():
@@ -38,7 +38,7 @@ def test_client(app):
     return app.test_client()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def db(app, request):
     """Session-wide test database."""
 
