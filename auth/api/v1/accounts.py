@@ -17,12 +17,15 @@ accounts = Blueprint("accounts", __name__, url_prefix="/accounts")
 @accounts.get("/")
 @jwt_required()
 def get() -> Response:
+    args = request.args
+    history_page = args.get("page", 1, int)
+    history_per_page = args.get("per_page", 5, int)
     claims = get_jwt()
     user = User.query.get(claims["sub"])
     auth_history = (
         AuthHistory.query.filter_by(user_id=user.id)
         .order_by(AuthHistory.created.desc())
-        .all()
+        .paginate(page=history_page, per_page=history_per_page)
     )
     return jsonify(
         email=claims["email"],
@@ -32,8 +35,11 @@ def get() -> Response:
                 "date": row.created,
                 "action": "" if row.action is None else row.action,
             }
-            for row in auth_history
+            for row in auth_history.items
         ],
+        history_current_page=history_page,
+        history_pages=auth_history.pages,
+        history_total=auth_history.total,
     )
 
 

@@ -59,6 +59,20 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          required: false
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Текущая страница истории действия пользователя.
+        - in: query
+          required: false
+          name: per_page
+          schema:
+            type: integer
+            default: 5
+          description: Количество записей на страницу истории действий пользователя.
       security:
         - bearerAuth: []
       responses:
@@ -73,6 +87,9 @@ paths:
                   - roles
                   - sessions
                   - history
+                  - history_current_page
+                  - history_pages
+                  - history_total
                 properties:
                   email:
                     type: string
@@ -110,6 +127,18 @@ paths:
                           enum:
                             - 'login'
                             - 'logout'
+                  history_current_page:
+                    type: integer
+                    description: Текущая страница истории действий пользователя.
+                    example: 2
+                  history_pages:
+                    type: integer
+                    description: Общее количество страниц истории действий пользователя.
+                    example: 4
+                  history_total:
+                    type: integer
+                    description: Общее количество записей истории действий пользователя.
+                    example: 18
         '401':
           $ref: "#/components/responses/JwtRequiredError"
         '403':
@@ -580,6 +609,21 @@ paths:
       summary: Получение информации об истории входов и прочее
       tags:
         - account
+      parameters:
+        - in: query
+          required: false
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Текущая страница истории действия пользователя.
+        - in: query
+          required: false
+          name: per_page
+          schema:
+            type: integer
+            default: 5
+          description: Количество записей на страницу истории действий пользователя.
       security:
         - bearerAuth: []
       responses:
@@ -593,6 +637,9 @@ paths:
                   - email
                   - sessions
                   - history
+                  - history_current_page
+                  - history_pages
+                  - history_total
                 properties:
                   email:
                     type: string
@@ -616,6 +663,18 @@ paths:
                           enum:
                             - 'login'
                             - 'logout'
+                  history_current_page:
+                    type: integer
+                    description: Текущая страница истории действий пользователя.
+                    example: 2
+                  history_pages:
+                    type: integer
+                    description: Общее количество страниц истории действий пользователя.
+                    example: 4
+                  history_total:
+                    type: integer
+                    description: Общее количество записей истории действий пользователя.
+                    example: 18
         '401':
           $ref: '#/components/responses/JwtRequiredError'
 
